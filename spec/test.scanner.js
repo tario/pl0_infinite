@@ -11,8 +11,15 @@ describe("Scanner", function() {
     expect(typeof this.scanner.scan).to.be("function");
   });
 
+  var convertNotation = function(str) {
+    return {
+      type: str.split("/")[0],
+      value: str.split("/")[1]
+    }
+  };
 
   var testParse = function(text, tokens) {
+    tokens = tokens.map(convertNotation);
     describe("when scan text '" + text + "'", function() {
       beforeEach(function() {
         this.scanner.scan(text);
@@ -20,12 +27,12 @@ describe("Scanner", function() {
 
       tokens.forEach(function(token, index) {
         describe("token " + index, function() {
-          it ("should have type " + token.type, function(){
+          it ("should have type '" + token.type + "'", function(){
             expect(this.tokens[index].type).to.be(token.type);
-          });
+          }); 
 
           if (token.value) {
-            it ("should have value " + token.value, function(){
+            it ("should have value '" + token.value + "'", function(){
               expect(this.tokens[index].value).to.be(token.value);
             });
           }
@@ -34,7 +41,7 @@ describe("Scanner", function() {
     });
   };
 
-  testParse("PROCEDURE", [ {type: 'keyword', value: 'PROCEDURE'}, {type: 'EOF'}]);
+  testParse("PROCEDURE", ['keyword/PROCEDURE', 'EOF']);
 
 
 });
