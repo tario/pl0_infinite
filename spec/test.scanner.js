@@ -41,7 +41,8 @@ describe("Scanner", function() {
     });
   };
 
-  testParse("PROCEDURE", ['keyword/PROCEDURE', 'EOF']);
-
-
+  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
+  keywords.forEach(function(keyword) {
+    testParse(keyword, ['keyword/' + keyword, 'EOF']);
+  });
 });
