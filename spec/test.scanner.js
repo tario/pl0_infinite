@@ -12,6 +12,8 @@ describe("Scanner", function() {
   });
 
   var convertNotation = function(str) {
+    if (str.type) return str;
+
     return {
       type: str.split("/")[0],
       value: str.split("/")[1]
@@ -44,5 +46,11 @@ describe("Scanner", function() {
   var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
   keywords.forEach(function(keyword) {
     testParse(keyword, ['keyword/' + keyword, 'EOF']);
+  });
+
+  var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/"]
+
+  separators.forEach(function(separator) {
+    testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
   });
 });
