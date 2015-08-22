@@ -48,7 +48,7 @@ describe("Scanner", function() {
     testParse(keyword, ['keyword/' + keyword, 'EOF']);
   });
 
-  var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/"]
+  var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/", "(", ")"]
 
   separators.forEach(function(separator) {
     testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
