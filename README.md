@@ -1,7 +1,8 @@
-= PL/0 = 
-= ★★★ INFINITE ★★★=
+PL/0 ★★★ INFINITE ★★★
+========================
 
-= Main topics =
+Main topics
+-----------
 
 * Scanner (Lexical Anayzer)
 * Parser (Syntax Analyzer)
