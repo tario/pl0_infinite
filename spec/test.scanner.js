@@ -43,20 +43,31 @@ describe("Scanner", function() {
     });
   };
 
-  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
-  keywords.forEach(function(keyword) {
-    testParse(keyword, ['keyword/' + keyword, 'EOF']);
+  describe("keywords", function() {
+    var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
+    keywords.forEach(function(keyword) {
+      testParse(keyword, ['keyword/' + keyword, 'EOF']);
+    });
   });
 
-  var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/", "(", ")"]
-
-  separators.forEach(function(separator) {
-    testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
+  describe("separators", function() {
+    var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/", "(", ")"]
+    separators.forEach(function(separator) {
+      testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
+    });
   });
 
-  var idents = ["variable1", "proc1", "proc2", "PROCEDURE42", "var3", "VAR43"];
-  idents.forEach(function(ident) {
-    testParse(ident, ["ident/"+ident, "EOF"]);
+  describe("idents", function() {
+    var idents = ["variable1", "proc1", "proc2", "PROCEDURE42", "var3", "VAR43"];
+    idents.forEach(function(ident) {
+      testParse(ident, ["ident/"+ident, "EOF"]);
+    });
   });
 
+  describe("numbers", function() {
+    var numbers = ["0", "1", "9330", "91.32", "90000"];
+    numbers.forEach(function(number) {
+      testParse(number, ["number/"+number, "EOF"]);
+    });
+  });
 });
