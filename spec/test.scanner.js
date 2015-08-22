@@ -53,4 +53,10 @@ describe("Scanner", function() {
   separators.forEach(function(separator) {
     testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
   });
+
+  var idents = ["variable1", "proc1", "proc2", "PROCEDURE42", "var3", "VAR43"];
+  idents.forEach(function(ident) {
+    testParse(ident, ["ident/"+ident, "EOF"]);
+  });
+
 });
