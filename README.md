@@ -8,6 +8,7 @@ Main topics
 * Parser (Syntax Analyzer)
 * Multi-Target compilation (Javascript, 32bit ELF, etc...)
 
-= More Info =
+More Info
+---------
 
 TODO
