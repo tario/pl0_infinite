@@ -27,11 +27,11 @@ describe("Scanner", function() {
         this.scanner.scan(text);
       });
 
-      tokens.forEach(function(token, index) {
-        it ("should have " + tokens.length + " tokens", function(){
-          expect(this.tokens.length).to.be(tokens.length);
-        }); 
+      it ("should have " + tokens.length + " tokens", function(){
+        expect(this.tokens.length).to.be(tokens.length);
+      }); 
 
+      tokens.forEach(function(token, index) {
         describe("token " + index, function() {
           it ("should have type '" + token.type + "'", function(){
             expect(this.tokens[index].type).to.be(token.type);
@@ -79,4 +79,10 @@ describe("Scanner", function() {
       testParse(number, ["number/"+number, "EOF"]);
     });
   });
+
+  testParse("CONST     VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testParse("CONST\x09\x09VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testParse("CONST\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testParse("CONST\n\n\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+
 });
