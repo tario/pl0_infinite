@@ -28,6 +28,10 @@ describe("Scanner", function() {
       });
 
       tokens.forEach(function(token, index) {
+        it ("should have " + tokens.length + " tokens", function(){
+          expect(this.tokens.length).to.be(tokens.length);
+        }); 
+
         describe("token " + index, function() {
           it ("should have type '" + token.type + "'", function(){
             expect(this.tokens[index].type).to.be(token.type);
@@ -47,6 +51,11 @@ describe("Scanner", function() {
     var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
     keywords.forEach(function(keyword) {
       testParse(keyword, ['keyword/' + keyword, 'EOF']);
+
+      keywords.forEach(function(keyword2) {
+        testParse(keyword + " " + keyword2, ['keyword/' + keyword, 'keyword/' + keyword2, 'EOF']);
+      });
+
     });
   });
 
