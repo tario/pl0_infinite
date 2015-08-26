@@ -1,13 +1,9 @@
 describe("Scanner", function() {
   beforeEach(function() {
-    var tokens = [];
-    this.tokens = tokens;
-    this.scanner = new PL0Infinite.DefaultScanner({}, function(token) {
-      tokens.push(token);
-    });
+    this.scanner = new PL0Infinite.DefaultScanner({});
   });
 
-  it ("should have scan function", function(){
+  it ("should have nextToken function", function(){
     expect(typeof this.scanner.scan).to.be("function");
   });
 
@@ -24,7 +20,15 @@ describe("Scanner", function() {
     tokens = tokens.map(convertNotation);
     describe("when scan text '" + text + "'", function() {
       beforeEach(function() {
-        this.scanner.scan(text);
+        var tokens = [];
+        this.tokens = tokens;
+        var scan = this.scanner.scan(text);
+        var token;
+        while(1) {
+          token = scan.nextToken();
+          tokens.push(token);
+          if (token.type === "EOF") break;
+        };
       });
 
       it ("should have " + tokens.length + " tokens", function(){
