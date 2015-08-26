@@ -78,7 +78,7 @@ describe("Scanner", function() {
   });
 
   describe("numbers", function() {
-    var numbers = ["0", "1", "9330", "91.32", "90000"];
+    var numbers = ["0", "1", "9330", "90000"];
     numbers.forEach(function(number) {
       testParse(number, ["number/"+number, "EOF"]);
     });
