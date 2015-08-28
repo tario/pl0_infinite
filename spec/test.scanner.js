@@ -89,4 +89,7 @@ describe("Scanner", function() {
   testParse("CONST\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
   testParse("CONST\n\n\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
 
+  testParse("6VAR", ['number/6', 'keyword/VAR', 'EOF']);
+
+
 });
