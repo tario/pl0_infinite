@@ -95,5 +95,6 @@ describe("Scanner", function() {
     testParse('"alpha"', ['string/alpha', 'EOF']);
     testParse('"beta"', ['string/beta', 'EOF']);
     testParse('"gamma"', ['string/gamma', 'EOF']);
+    testParse('"x"6', ['string/x', 'number/6', 'EOF']);
   });
 });
