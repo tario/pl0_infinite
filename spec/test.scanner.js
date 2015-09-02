@@ -91,5 +91,9 @@ describe("Scanner", function() {
 
   testParse("6VAR", ['number/6', 'keyword/VAR', 'EOF']);
 
-
+  describe("strings", function() {
+    testParse('"alpha"', ['string/alpha', 'EOF']);
+    testParse('"beta"', ['string/beta', 'EOF']);
+    testParse('"gamma"', ['string/gamma', 'EOF']);
+  });
 });
