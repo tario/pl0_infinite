@@ -16,7 +16,7 @@ describe("Scanner", function() {
     }
   };
 
-  var testParse = function(text, tokens) {
+  var testScan = function(text, tokens) {
     tokens = tokens.map(convertNotation);
     describe("when scan text '" + text + "'", function() {
       beforeEach(function() {
@@ -54,10 +54,10 @@ describe("Scanner", function() {
   describe("keywords", function() {
     var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
     keywords.forEach(function(keyword) {
-      testParse(keyword, ['keyword/' + keyword, 'EOF']);
+      testScan(keyword, ['keyword/' + keyword, 'EOF']);
 
       keywords.forEach(function(keyword2) {
-        testParse(keyword + " " + keyword2, ['keyword/' + keyword, 'keyword/' + keyword2, 'EOF']);
+        testScan(keyword + " " + keyword2, ['keyword/' + keyword, 'keyword/' + keyword2, 'EOF']);
       });
 
     });
@@ -66,35 +66,35 @@ describe("Scanner", function() {
   describe("separators", function() {
     var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/", "(", ")"]
     separators.forEach(function(separator) {
-      testParse(separator, [{type: separator, value: separator}, {type: 'EOF'}]);
+      testScan(separator, [{type: separator, value: separator}, {type: 'EOF'}]);
     });
   });
 
   describe("idents", function() {
     var idents = ["variable1", "proc1", "proc2", "PROCEDURE42", "var3", "VAR43"];
     idents.forEach(function(ident) {
-      testParse(ident, ["ident/"+ident, "EOF"]);
+      testScan(ident, ["ident/"+ident, "EOF"]);
     });
   });
 
   describe("numbers", function() {
     var numbers = ["0", "1", "9330", "90000"];
     numbers.forEach(function(number) {
-      testParse(number, ["number/"+number, "EOF"]);
+      testScan(number, ["number/"+number, "EOF"]);
     });
   });
 
-  testParse("CONST     VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testParse("CONST\x09\x09VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testParse("CONST\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testParse("CONST\n\n\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testScan("CONST     VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testScan("CONST\x09\x09VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testScan("CONST\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testScan("CONST\n\n\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
 
-  testParse("6VAR", ['number/6', 'keyword/VAR', 'EOF']);
+  testScan("6VAR", ['number/6', 'keyword/VAR', 'EOF']);
 
   describe("strings", function() {
-    testParse('"alpha"', ['string/alpha', 'EOF']);
-    testParse('"beta"', ['string/beta', 'EOF']);
-    testParse('"gamma"', ['string/gamma', 'EOF']);
-    testParse('"x"6', ['string/x', 'number/6', 'EOF']);
+    testScan('"alpha"', ['string/alpha', 'EOF']);
+    testScan('"beta"', ['string/beta', 'EOF']);
+    testScan('"gamma"', ['string/gamma', 'EOF']);
+    testScan('"x"6', ['string/x', 'number/6', 'EOF']);
   });
 });
