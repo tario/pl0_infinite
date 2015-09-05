@@ -66,7 +66,7 @@ describe("Scanner", function() {
   describe("separators", function() {
     var separators = [".", "=", ",", ";", "=", "<>", "<", ">", "<=", "=>", "+", "-", "*", "/", "(", ")"]
     separators.forEach(function(separator) {
-      testParse(separator, [{type: 'sep', value: separator}, {type: 'EOF'}]);
+      testParse(separator, [{type: separator, value: separator}, {type: 'EOF'}]);
     });
   });
 
