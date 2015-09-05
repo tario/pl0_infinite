@@ -54,10 +54,10 @@ describe("Scanner", function() {
   describe("keywords", function() {
     var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
     keywords.forEach(function(keyword) {
-      testScan(keyword, ['keyword/' + keyword, 'EOF']);
+      testScan(keyword, [keyword, 'EOF']);
 
       keywords.forEach(function(keyword2) {
-        testScan(keyword + " " + keyword2, ['keyword/' + keyword, 'keyword/' + keyword2, 'EOF']);
+        testScan(keyword + " " + keyword2, [keyword, keyword2, 'EOF']);
       });
 
     });
@@ -84,12 +84,12 @@ describe("Scanner", function() {
     });
   });
 
-  testScan("CONST     VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testScan("CONST\x09\x09VAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testScan("CONST\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
-  testScan("CONST\n\n\nVAR", ['keyword/CONST', 'keyword/VAR', 'EOF']);
+  testScan("CONST     VAR", ['CONST', 'VAR', 'EOF']);
+  testScan("CONST\x09\x09VAR", ['CONST', 'VAR', 'EOF']);
+  testScan("CONST\nVAR", ['CONST', 'VAR', 'EOF']);
+  testScan("CONST\n\n\nVAR", ['CONST', 'VAR', 'EOF']);
 
-  testScan("6VAR", ['number/6', 'keyword/VAR', 'EOF']);
+  testScan("6VAR", ['number/6', 'VAR', 'EOF']);
 
   describe("strings", function() {
     testScan('"alpha"', ['string/alpha', 'EOF']);
