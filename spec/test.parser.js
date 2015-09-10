@@ -55,5 +55,7 @@ describe("Parser", function() {
   testParse(["BEGIN", "END", ".", "EOF"], true); // es un programa valido
   testParse(["BEGIN", "END", "END", ".", "EOF"], false); // no es un programa valido
   testParse(["BEGIN", ".", "EOF"], false); // no es un programa valido
+
+  testParse(["IDENT/a", ":=", "IDENT/b", "EOF"], false); // NO es un programa valido porque le falta .
 });
 
