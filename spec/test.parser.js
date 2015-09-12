@@ -57,5 +57,9 @@ describe("Parser", function() {
   testParse(["BEGIN", ".", "EOF"], false); // no es un programa valido
 
   testParse(["IDENT/a", ":=", "IDENT/b", "EOF"], false); // NO es un programa valido porque le falta .
+
+  testParse(["CALL", "IDENT/a", ".", "EOF"], true); // es un programa valido
+  testParse(["CALL", "NUMBER/4", ".", "EOF"], false); // NO un programa valido
+  testParse(["CALL", ".", "EOF"], false); // NO un programa valido
 });
 
