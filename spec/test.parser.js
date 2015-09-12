@@ -16,8 +16,16 @@ describe("Parser", function() {
     }
   };
 
+  var concatSubArrays = function(a, b) {
+    if (!Array.isArray(a)) a=[a];
+    if (!Array.isArray(b)) b=[b];
+
+    return a.concat(b);
+  };
+
   var testParse = function(_tokens, valid) {
-    var tokens = _tokens.map(convertNotation);
+    var tokens = _tokens.reduce(concatSubArrays).map(convertNotation);
+
     describe("when parse " + JSON.stringify(_tokens), function() {
       beforeEach(function() {
         var x = -1;
@@ -61,5 +69,18 @@ describe("Parser", function() {
   testParse(["CALL", "IDENT/a", ".", "EOF"], true); // es un programa valido
   testParse(["CALL", "NUMBER/4", ".", "EOF"], false); // NO un programa valido
   testParse(["CALL", ".", "EOF"], false); // NO un programa valido
+
+  testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], true);
+
+  var validStatements = [
+    ["IDENT/a", ":=", "IDENT/b"],
+    ["BEGIN", "END"],
+    ["CALL", "IDENT/a"],
+    ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"]
+  ];
+
+  validStatements.forEach(function(statement) {
+    testParse(["IF", "ODD", "NUMBER/4", "THEN", statement, "END", ".", "EOF"], true);
+  });
 });
 
