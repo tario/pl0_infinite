@@ -54,6 +54,13 @@ describe("Parser", function() {
     });
   };
 
+  var validStatements = [
+    ["IDENT/a", ":=", "IDENT/b"],
+    ["BEGIN", "END"],
+    ["CALL", "IDENT/a"],
+    ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"]
+  ];
+
   testParse([".", "EOF"], true); // es un programa valido
   testParse(["CONST", ".", "EOF"], false); // no es un programa valido
 
@@ -64,6 +71,13 @@ describe("Parser", function() {
   testParse(["BEGIN", "END", "END", ".", "EOF"], false); // no es un programa valido
   testParse(["BEGIN", ".", "EOF"], false); // no es un programa valido
 
+  validStatements.forEach(function(statement) {
+    testParse(["BEGIN", statement, "END", ".", "EOF"], true); // es un programa valido
+    validStatements.forEach(function(statement2) {
+      testParse(["BEGIN", statement, ";", statement2, "END", ".", "EOF"], true); // es un programa valido
+    });
+  });
+
   testParse(["IDENT/a", ":=", "IDENT/b", "EOF"], false); // NO es un programa valido porque le falta .
 
   testParse(["CALL", "IDENT/a", ".", "EOF"], true); // es un programa valido
@@ -71,13 +85,6 @@ describe("Parser", function() {
   testParse(["CALL", ".", "EOF"], false); // NO un programa valido
 
   testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], true);
-
-  var validStatements = [
-    ["IDENT/a", ":=", "IDENT/b"],
-    ["BEGIN", "END"],
-    ["CALL", "IDENT/a"],
-    ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"]
-  ];
 
   validStatements.forEach(function(statement) {
     testParse(["IF", "ODD", "NUMBER/4", "THEN", statement, "END", ".", "EOF"], true);
