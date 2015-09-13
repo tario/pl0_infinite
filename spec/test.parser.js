@@ -26,7 +26,7 @@ describe("Parser", function() {
   var testParse = function(_tokens, valid) {
     var tokens = _tokens.reduce(concatSubArrays).map(convertNotation);
 
-    describe("when parse " + JSON.stringify(_tokens), function() {
+    describe("when parse " + _tokens.join(" "), function() {
       beforeEach(function() {
         var x = -1;
         var nextToken = function() {
@@ -89,7 +89,12 @@ describe("Parser", function() {
   var conditions = [
     ["ODD", "NUMBER/4"],
     ["NUMBER/4", ">", "NUMBER/3"],
-    ["IDENT/Z", "=", "NUMBER/10"]
+    ["IDENT/Z", "=", "NUMBER/10"],
+    ["IDENT/Z", "=", "NUMBER/10"],
+    ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"],
+    ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"],
+    ["-", "NUMBER/1", "<=", "NUMBER/10"],
+    ["+", "NUMBER/1", "<=", "NUMBER/10"]
   ];
 
   validStatements.forEach(function(statement) {
