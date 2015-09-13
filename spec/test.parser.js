@@ -92,6 +92,7 @@ describe("Parser", function() {
     ["IDENT/Z", "=", "NUMBER/10"],
     ["IDENT/Z", "=", "NUMBER/10"],
     ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"],
+    ["(", "IDENT/M", "+", "NUMBER/1", "-", "IDENT/Q", ")", "<=", "NUMBER/10"],
     ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"],
     ["-", "NUMBER/1", "<=", "NUMBER/10"],
     ["+", "NUMBER/1", "<=", "NUMBER/10"],
@@ -105,6 +106,8 @@ describe("Parser", function() {
       testParse(["IF", condition, "THEN", statement, "END", ".", "EOF"], true);
       testParse(["WHILE", condition, "DO", statement, "END", ".", "EOF"], true);
     });
+
+    testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement, "END", ".", "EOF"], false);
   });
 
 });
