@@ -89,5 +89,9 @@ describe("Parser", function() {
   validStatements.forEach(function(statement) {
     testParse(["IF", "ODD", "NUMBER/4", "THEN", statement, "END", ".", "EOF"], true);
   });
+
+  validStatements.forEach(function(statement) {
+    testParse(["WHILE", "ODD", "NUMBER/4", "DO", statement, "END", ".", "EOF"], true);
+  });
 });
 
