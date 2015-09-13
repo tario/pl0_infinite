@@ -94,7 +94,10 @@ describe("Parser", function() {
     ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"],
     ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"],
     ["-", "NUMBER/1", "<=", "NUMBER/10"],
-    ["+", "NUMBER/1", "<=", "NUMBER/10"]
+    ["+", "NUMBER/1", "<=", "NUMBER/10"],
+    ["IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"],
+    ["IDENT/M", {type: "/", value: "/"}, "NUMBER/2", "<=", "NUMBER/10"],
+    ["IDENT/Z", "+", "IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"]
   ];
 
   validStatements.forEach(function(statement) {
