@@ -86,12 +86,18 @@ describe("Parser", function() {
 
   testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], true);
 
-  validStatements.forEach(function(statement) {
-    testParse(["IF", "ODD", "NUMBER/4", "THEN", statement, "END", ".", "EOF"], true);
-  });
+  var conditions = [
+    ["ODD", "NUMBER/4"],
+    ["NUMBER/4", ">", "NUMBER/3"],
+    ["IDENT/Z", "=", "NUMBER/10"]
+  ];
 
   validStatements.forEach(function(statement) {
-    testParse(["WHILE", "ODD", "NUMBER/4", "DO", statement, "END", ".", "EOF"], true);
+    conditions.forEach(function(condition) {
+      testParse(["IF", condition, "THEN", statement, "END", ".", "EOF"], true);
+      testParse(["WHILE", condition, "DO", statement, "END", ".", "EOF"], true);
+    });
   });
+
 });
 
