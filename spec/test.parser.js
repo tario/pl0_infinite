@@ -69,6 +69,9 @@ describe("Parser", function() {
   testParse(["VAR", "IDENT/a", ";", ".", "EOF"], true); // es un programa valido
   testParse(["VAR", "IDENT/a", ",", "IDENT/z", ";", ".", "EOF"], true); // es un programa valido
 
+  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], true); // es un programa valido
+  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ";", ".", "EOF"], false); // NO es un programa valido
+
   testParse(["IDENT/a", ":=", "IDENT/b", ".", "EOF"], true); // es un programa valido
   testParse(["IDENT/a", ":=", ".", "EOF"], false); // no es un programa valido
 
