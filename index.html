@@ -1,0 +1,37 @@
+<html>
+<head>
+<script src="lib/angular.min.js"></script>
+<script src="lib/jquery-1.11.2.min.js"></script>
+<script src="lib/bootstrap.min.js"></script>
+<script src="lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
+<script src="lib/fn.js"></script>
+<script src="lib/codemirror.js"></script>
+<script src="lib/codemirror/mode/pascal.js"></script>
+<script src="lib/angular/ui-codemirror.js"></script>
+<script src="src/pl0_infinite.js"></script>
+
+<script src="site/app.js"></script>
+<script src="site/controllers.js"></script>
+
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/codemirror.css">
+<style>
+.code-error {
+  color: red;
+  white-space: pre;
+}
+</style>
+</head>
+<body>
+
+<div ng-app="PL0InfiniteUI">
+    <div ng-controller="MainController">
+        <h3>PL0 Infinite</h3>
+        <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal'}" ng-model="code">
+        </textarea>
+        <h3>Results</h3>
+        <b ng-if="error"class="code-error">{{error}}</b>
+    </div>
+</div>
+
+</body>
