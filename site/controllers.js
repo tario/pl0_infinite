@@ -5,7 +5,7 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
     var parser = new PL0Infinite.DefaultParser({});
     var scanner = new PL0Infinite.DefaultScanner({});
 
-    var scan = scanner.scan($scope.code);
+    var scan = scanner.scan($scope.code || "");
     try {
       parser.parse(scan);
       $timeout(function() { $scope.error = null });
@@ -14,5 +14,5 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
     }
   };
 
-  $scope.$watch(fn.debounce(codeChanged, 1000));
+  $scope.$watch(fn.debounce(codeChanged, 200));
 }])
