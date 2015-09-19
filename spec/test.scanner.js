@@ -73,14 +73,14 @@ describe("Scanner", function() {
   describe("idents", function() {
     var idents = ["variable1", "proc1", "proc2", "PROCEDURE42", "var3", "VAR43"];
     idents.forEach(function(ident) {
-      testScan(ident, ["ident/"+ident, "EOF"]);
+      testScan(ident, ["IDENT/"+ident, "EOF"]);
     });
   });
 
   describe("numbers", function() {
     var numbers = ["0", "1", "9330", "90000"];
     numbers.forEach(function(number) {
-      testScan(number, ["number/"+number, "EOF"]);
+      testScan(number, ["NUMBER/"+number, "EOF"]);
     });
   });
 
@@ -89,12 +89,12 @@ describe("Scanner", function() {
   testScan("CONST\nVAR", ['CONST', 'VAR', 'EOF']);
   testScan("CONST\n\n\nVAR", ['CONST', 'VAR', 'EOF']);
 
-  testScan("6VAR", ['number/6', 'VAR', 'EOF']);
+  testScan("6VAR", ['NUMBER/6', 'VAR', 'EOF']);
 
   describe("strings", function() {
-    testScan('"alpha"', ['string/alpha', 'EOF']);
-    testScan('"beta"', ['string/beta', 'EOF']);
-    testScan('"gamma"', ['string/gamma', 'EOF']);
-    testScan('"x"6', ['string/x', 'number/6', 'EOF']);
+    testScan('"alpha"', ['STRING/alpha', 'EOF']);
+    testScan('"beta"', ['STRING/beta', 'EOF']);
+    testScan('"gamma"', ['STRING/gamma', 'EOF']);
+    testScan('"x"6', ['STRING/x', 'number/6', 'EOF']);
   });
 });

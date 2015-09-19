@@ -31,13 +31,13 @@ window.PL0Infinite = (function() {
           if (keywords.indexOf(token) !== -1) {
             return {type: token, value: token};
           } else {
-            return {type: 'ident', value: token};
+            return {type: 'IDENT', value: token};
           }
       }}]
     ],
     Z2: [
       [/^[0-9]$/, "Z2"],
-      [/^.?$/, "S", {emit: token("number")}]
+      [/^.?$/, "S", {emit: token("NUMBER")}]
     ],
     Z3: [
       [/^>$/, "Z3"],
@@ -56,7 +56,7 @@ window.PL0Infinite = (function() {
       [/^.?$/, "S", {emit: tokenSelf}]
     ],
     ZSTR: [
-      [/^\"$/ /*"*/, "S", {emit: token("string"), forward:1}],
+      [/^\"$/ /*"*/, "S", {emit: token("STRING"), forward:1}],
       [/^.$/, "ZSTR"],
       [/^$/, "S", {emit: token("EOF")}]
     ]
