@@ -119,7 +119,7 @@ window.PL0Infinite = (function() {
   DefaultParser.prototype.parse = function(scanner) {
     var token;
     var readToken = function(type) {
-        if (token.type !== type) throw "Expected " + type + " found " + token.type;
+        if (token.type !== type) throw {expected: [type], found: token};
         token = scanner.nextToken();
     }
 
@@ -138,7 +138,7 @@ window.PL0Infinite = (function() {
 
     var readOneOf = function(array, tokenName) {
       if (array.indexOf(token.type) === -1) {
-        throw "Expected " + tokenName + " found " + token.type;
+        throw {expected: [tokenName], found: token};
       }
       token = scanner.nextToken();
     };
@@ -153,7 +153,7 @@ window.PL0Infinite = (function() {
       } else if (token.type === "NUMBER") {
         readToken("NUMBER");
       } else {
-        throw "expected IDENT, NUMBER or (. found " + token.type;
+        throw {expected: ["IDENT", "NUMBER", "("], found: token};
       }
     }
 

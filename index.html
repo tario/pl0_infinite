@@ -20,6 +20,10 @@
   color: red;
   white-space: pre;
 }
+
+.errorline {
+  background-color: #fcc;
+}
 </style>
 </head>
 <body>
@@ -27,7 +31,7 @@
 <div ng-app="PL0InfiniteUI">
     <div ng-controller="MainController">
         <h3>PL0 Infinite</h3>
-        <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal'}" ng-model="code">
+        <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal', onLoad: codemirrorLoaded}" ng-model="code">
         </textarea>
         <h3>Results</h3>
         <b ng-if="error"class="code-error">{{error}}</b>
