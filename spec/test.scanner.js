@@ -95,6 +95,6 @@ describe("Scanner", function() {
     testScan('"alpha"', ['STRING/alpha', 'EOF']);
     testScan('"beta"', ['STRING/beta', 'EOF']);
     testScan('"gamma"', ['STRING/gamma', 'EOF']);
-    testScan('"x"6', ['STRING/x', 'number/6', 'EOF']);
+    testScan('"x"6', ['STRING/x', 'NUMBER/6', 'EOF']);
   });
 });
