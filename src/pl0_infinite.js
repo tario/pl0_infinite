@@ -68,6 +68,7 @@ window.PL0Infinite = (function() {
 
     var currentIndex = 0;
     var currentState = "S";
+    var currentLine = 1;
     var acc = "";
     var nextToken = function() {
       while(1) {
@@ -86,7 +87,9 @@ window.PL0Infinite = (function() {
               if (edge[2].forward) {
                 currentIndex+=edge[2].forward;
               }
-              return edge[2].emit(token);
+              var ret = edge[2].emit(token);
+              ret.line = currentLine;
+              return ret;
             } else {
               if (!edge[2] || !edge[2].skip) {
                 acc = acc + character;
@@ -96,6 +99,8 @@ window.PL0Infinite = (function() {
             break;
           }
         };
+
+        if (character === "\n") currentLine++;
       }
 
     };

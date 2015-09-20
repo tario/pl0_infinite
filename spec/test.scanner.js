@@ -8,7 +8,7 @@ describe("Scanner", function() {
   });
 
   var convertNotation = function(str) {
-    if (str.type) return str;
+    if (typeof str === "object") return str;
 
     return {
       type: str.split("/")[0],
@@ -37,9 +37,18 @@ describe("Scanner", function() {
 
       tokens.forEach(function(token, index) {
         describe("token " + index, function() {
-          it ("should have type '" + token.type + "'", function(){
-            expect(this.tokens[index].type).to.be(token.type);
-          }); 
+          if (token.line) {
+            it ("should have line " + token.line, function(){
+              expect(this.tokens[index].line).to.be(token.line);
+            }); 
+
+          }
+
+          if (token.type) {
+            it ("should have type '" + token.type + "'", function(){
+              expect(this.tokens[index].type).to.be(token.type);
+            }); 
+          }
 
           if (token.value) {
             it ("should have value '" + token.value + "'", function(){
@@ -97,4 +106,12 @@ describe("Scanner", function() {
     testScan('"gamma"', ['STRING/gamma', 'EOF']);
     testScan('"x"6', ['STRING/x', 'NUMBER/6', 'EOF']);
   });
+
+  testScan("CONST\nVAR", [{line:1}, {line:2}, {type: "EOF"}]);
+  testScan("\nCONST VAR", [{line:2}, {line:2}, {type: "EOF"}]);
+  testScan("CONST VAR", [{line:1}, {line:1}, {type: "EOF"}]);
+  testScan("CONST VAR\n100\n300", [{line:1}, {line:1}, {line:2}, {line:3}, {type: "EOF"}]);
+  testScan("CONST VAR \n100 \n300", [{line:1}, {line:1}, {line:2}, {line:3}, {type: "EOF"}]);
+  testScan("CONST VAR \n100\x09\n300", [{line:1}, {line:1}, {line:2}, {line:3}, {type: "EOF"}]);
+
 });
