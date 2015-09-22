@@ -220,13 +220,17 @@ window.PL0Infinite = (function() {
         readToken(";");
       }
 
-      if (token.type === "PROCEDURE") {
-        readToken("PROCEDURE");
-        readToken("IDENT");
-        readToken(";");
-        readBlock();
-        readToken(";");
-      }
+      while(1) {
+        if (token.type === "PROCEDURE") {
+          readToken("PROCEDURE");
+          readToken("IDENT");
+          readToken(";");
+          readBlock();
+          readToken(";");
+        } else {
+          break;
+        }
+      };
 
       readStatement();
     }
