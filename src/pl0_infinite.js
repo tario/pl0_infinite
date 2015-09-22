@@ -185,7 +185,7 @@ window.PL0Infinite = (function() {
           repeat(readStatement, ";");
         readToken("END");
       } else if (token.type === "IDENT") {
-        readToken("IDENT"); readToken(":="); readToken("IDENT");
+        readToken("IDENT"); readToken(":="); readExpression();
       } else if (token.type === "CALL") {
         readToken("CALL"); readToken("IDENT");
       } else if (token.type === "IF") {

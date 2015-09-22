@@ -54,12 +54,26 @@ describe("Parser", function() {
     });
   };
 
+  var validExpressions = [
+    ["NUMBER/55"],
+    ["IDENT/c"],
+    ["IDENT/c","+","IDENT/b"],
+    ["NUMBER/888","+","IDENT/b"],
+    ["(","NUMBER/888","+","IDENT/b",")","*","NUMBER/2"],
+    ["IDENT/Z","*","NUMBER/2"]
+  ];
+
   var validStatements = [
     ["IDENT/a", ":=", "IDENT/b"],
     ["BEGIN", "END"],
     ["CALL", "IDENT/a"],
     ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"]
   ];
+
+  validExpressions.forEach(function(validExpression) {
+    testParse(["IDENT/a", ":=", validExpression, ".", "EOF"], true); // es un programa valido
+
+  });
 
   testParse([".", "EOF"], true); // es un programa valido
   testParse(["CONST", ".", "EOF"], false); // no es un programa valido
