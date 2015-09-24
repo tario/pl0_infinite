@@ -243,5 +243,29 @@ window.PL0Infinite = (function() {
 
   pl0.DefaultParser = DefaultParser;
 
+  var NodeBuilder = function(node) {
+    return {
+      attr: function(keyName, obj) {
+        node[keyName] = node[keyName] ||[];
+        node[keyName].push(obj);
+      },
+      child: function(keyName, typeName, cb) {
+        node[keyName] = node[keyName] ||[];
+        var child = {type: typeName};
+        if (cb) cb(NodeBuilder(child));
+        node[keyName].push(child);
+      }
+    };
+  };
+
+  var ASTBuilder = function() {
+    this.result = {type: "program"};
+    var mainBuilder = NodeBuilder(this.result);
+    this.attr = mainBuilder.attr.bind(mainBuilder);
+    this.child = mainBuilder.child.bind(mainBuilder);
+  };
+
+  pl0.ASTBuilder = ASTBuilder;
+
   return pl0;
 })();
