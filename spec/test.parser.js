@@ -28,6 +28,10 @@ describe("Parser", function() {
 
     describe("when parse " + _tokens.join(" "), function() {
       beforeEach(function() {
+        this.builder = new PL0Infinite.ASTBuilder();
+      });
+
+      beforeEach(function() {
         var x = -1;
         var nextToken = function() {
           x++;
@@ -39,13 +43,29 @@ describe("Parser", function() {
       });
 
       var parse = function() {
-        return this.parser.parse(this.scanner);
+        return this.parser.parse(this.scanner, {output: this.builder});
       };
 
       if (valid) {
         it("should be valid", function() {
           chai.expect(parse.bind(this)).to.not.throw();
         });
+
+        if (typeof valid === "object") {
+          it("should parse to tree " + JSON.stringify(valid), function() {
+            parse.bind(this)();
+            var result = this.builder.result;
+
+            try {
+              chai.expect(result).to.deep.equal(valid);
+            } catch (e) {
+              console.log(JSON.stringify(result, null, 4));
+              console.log(JSON.stringify(valid, null, 4));
+              debugger;
+              throw e;
+            }
+          })
+        }
       } else {
         it("should not be valid", function() {
           chai.expect(parse.bind(this)).to.throw();
@@ -55,12 +75,31 @@ describe("Parser", function() {
   };
 
   var validExpressions = [
-    ["NUMBER/55"],
-    ["IDENT/c"],
-    ["IDENT/c","+","IDENT/b"],
-    ["NUMBER/888","+","IDENT/b"],
-    ["(","NUMBER/888","+","IDENT/b",")","*","NUMBER/2"],
-    ["IDENT/Z","*","NUMBER/2"]
+    {tokens: ["NUMBER/55"], tree: {type: "expression", term: [{type: "product", factor: [{type:"number", value: [55]}] }] }},
+    {tokens: ["IDENT/c"], tree: {type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["c"]}] }] }},
+    {tokens: ["IDENT/c","+","IDENT/b"], tree: {type: "expression", term: [
+      {type: "product", factor: [{type:"ident", value: ["c"]}] },
+      {type: "product", factor: [{type:"ident", value: ["b"]}] }
+    ]}},
+    {tokens: ["NUMBER/888","+","IDENT/b"], tree: {type: "expression", term: [
+      {type: "product", factor: [{type:"number", value: [888]}] },
+      {type: "product", factor: [{type:"ident", value: ["b"]}] }
+    ]}},
+    {tokens: ["(","NUMBER/888","+","IDENT/b",")","*","NUMBER/2"], tree: {type: "expression", term: [
+      {
+        type: "product", 
+        factor: [
+          {type:"expression", term: [
+            {type: "product", factor: [{type:"number", value: [888]}] },
+            {type: "product", factor: [{type:"ident", value: ["b"]}] }
+          ]}, 
+          {type:"number", value: [2]}
+        ] 
+      }
+    ]}},
+    {tokens: ["IDENT/Z","*","NUMBER/2"], tree: {type: "expression", term: [
+      {type: "product", factor: [{type:"ident", value: ["Z"]}, {type:"number", value: [2]}] }
+    ]}}
   ];
 
   var validStatements = [
@@ -71,17 +110,50 @@ describe("Parser", function() {
   ];
 
   validExpressions.forEach(function(validExpression) {
-    testParse(["IDENT/a", ":=", validExpression, ".", "EOF"], true); // es un programa valido
-
+    testParse(["IDENT/a", ":=", validExpression.tokens, ".", "EOF"], validExpression.tree ? {
+      type: "program", 
+      block: [{
+        type: "block",
+        statement: [{
+          type: "lasgn",
+          ident: ["a"],
+          expression: [validExpression.tree]
+        }]
+      }]
+    } :true); // es un programa valido
   });
 
-  testParse([".", "EOF"], true); // es un programa valido
+  testParse([".", "EOF"], {type: "program", block: [{type: "block"}]}); // es un programa valido
   testParse(["CONST", ".", "EOF"], false); // no es un programa valido
-  testParse(["CONST", "IDENT/a", "=", "NUMBER/4", ";", ".", "EOF"], true); // es un programa valido
-  testParse(["CONST", "IDENT/a", "=", "NUMBER/4", ",", "IDENT/z", "=", "NUMBER/14", ";", ".", "EOF"], true); // es un programa valido
+  testParse(["CONST", "IDENT/a", "=", "NUMBER/4", ";", ".", "EOF"], {
+    type: "program", 
+    block: [{
+      type: "block",
+      _const: [["a", 4]]
+    }]
+  }); // es un programa valido
+  testParse(["CONST", "IDENT/a", "=", "NUMBER/4", ",", "IDENT/z", "=", "NUMBER/14", ";", ".", "EOF"], {
+    type: "program", 
+    block: [{
+      type: "block",
+      _const: [["a", 4], ["z", 14]]
+    }]
+  }); // es un programa valido
 
-  testParse(["VAR", "IDENT/a", ";", ".", "EOF"], true); // es un programa valido
-  testParse(["VAR", "IDENT/a", ",", "IDENT/z", ";", ".", "EOF"], true); // es un programa valido
+  testParse(["VAR", "IDENT/a", ";", ".", "EOF"], {
+    type: "program", 
+    block: [{
+      type: "block",
+      _var: ["a"]
+    }]
+  }); // es un programa valido
+  testParse(["VAR", "IDENT/a", ",", "IDENT/z", ";", ".", "EOF"], {
+    type: "program", 
+    block: [{
+      type: "block",
+      _var: ["a", "z"]
+    }]
+  }); // es un programa valido
 
   testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], true); // es un programa valido
   testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ";", ".", "EOF"], false); // NO es un programa valido

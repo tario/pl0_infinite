@@ -116,11 +116,26 @@ window.PL0Infinite = (function() {
 
   };
 
-  DefaultParser.prototype.parse = function(scanner) {
+  DefaultParser.prototype.parse = function(scanner, options) {
+    options = options || {};
     var token;
+    var currentNode = options.output;
+
+    var child = function(attrName, nodeType, fcn) {
+
+      var oldNode = currentNode;
+      currentNode.child(attrName, nodeType, function(newNode) {
+        currentNode = newNode;
+        fcn(newNode);
+        currentNode = oldNode;
+      });
+    };
+
     var readToken = function(type) {
+        var currToken = token;
         if (token.type !== type) throw {expected: [type], found: token};
         token = scanner.nextToken();
+        return currToken;
     }
 
     var repeat = function(fcn, separator) {
@@ -146,19 +161,27 @@ window.PL0Infinite = (function() {
     var readFactor = function() {
       if (token.type === "(") {
         readToken("(");
-          readExpression();
+          child("factor", "expression", function() {
+            readExpression();
+          });
         readToken(")");
       } else if (token.type === "IDENT") {
-        readToken("IDENT");
+        child("factor", "ident", function() {
+          currentNode.attr("value", readToken("IDENT").value);
+        });
       } else if (token.type === "NUMBER") {
-        readToken("NUMBER");
+        child("factor", "number", function() {
+          currentNode.attr("value", parseInt(readToken("NUMBER").value));
+        });
       } else {
         throw {expected: ["IDENT", "NUMBER", "("], found: token};
       }
     }
 
     var readTerm = function() {
-      repeat(readFactor, ["*", "/"]);
+      child("term", "product", function() {
+        repeat(readFactor, ["*", "/"]);
+      });
     }
 
     var readExpression = function() {
@@ -185,7 +208,15 @@ window.PL0Infinite = (function() {
           repeat(readStatement, ";");
         readToken("END");
       } else if (token.type === "IDENT") {
-        readToken("IDENT"); readToken(":="); readExpression();
+
+        child("statement", "lasgn", function() {
+          currentNode.attr("ident", readToken("IDENT").value); 
+          readToken(":="); 
+          child("expression", "expression", function() {
+            readExpression();
+          });
+        });
+
       } else if (token.type === "CALL") {
         readToken("CALL"); readToken("IDENT");
       } else if (token.type === "IF") {
@@ -202,37 +233,42 @@ window.PL0Infinite = (function() {
     var token;
     token = scanner.nextToken();
     var readBlock = function() {
-      if (token.type === "CONST") {
-        readToken("CONST");
-        repeat(function() {
-          readToken("IDENT");
-          readToken("=");
-          readToken("NUMBER");
-        }, ",")
-        readToken(";");
-      }
+      child("block", "block", function() {
+        if (token.type === "CONST") {
+          readToken("CONST");
+          repeat(function() {
+            var id = readToken("IDENT");
+            readToken("=");
+            var num = readToken("NUMBER");
 
-      if (token.type === "VAR") {
-        readToken("VAR");
-        repeat(function() {
-          readToken("IDENT");
-        }, ",")
-        readToken(";");
-      }
-
-      while(1) {
-        if (token.type === "PROCEDURE") {
-          readToken("PROCEDURE");
-          readToken("IDENT");
+            currentNode.attr("_const", [id.value, parseInt(num.value)])
+          }, ",")
           readToken(";");
-          readBlock();
-          readToken(";");
-        } else {
-          break;
         }
-      };
 
-      readStatement();
+        if (token.type === "VAR") {
+          readToken("VAR");
+          repeat(function() {
+            var id = readToken("IDENT");
+            currentNode.attr("_var", id.value)
+          }, ",")
+          readToken(";");
+        }
+
+        while(1) {
+          if (token.type === "PROCEDURE") {
+            readToken("PROCEDURE");
+            readToken("IDENT");
+            readToken(";");
+            readBlock();
+            readToken(";");
+          } else {
+            break;
+          }
+        };
+
+        readStatement();
+      });
     }
     
     readBlock();
