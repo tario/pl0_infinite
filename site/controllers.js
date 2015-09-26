@@ -16,10 +16,11 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
     var codeChanged = function() {
       var parser = new PL0Infinite.DefaultParser({});
       var scanner = new PL0Infinite.DefaultScanner({});
+      var builder = new PL0Infinite.ASTBuilder();
 
       var scan = scanner.scan($scope.code || "");
       try {
-        parser.parse(scan);
+        parser.parse(scan, {output: builder});
         $timeout(function() { clearErrorLines(); $scope.error = null });
       } catch (e) {
         if (e.expected) {
