@@ -9,6 +9,7 @@ describe("Parser", function() {
 
   var convertNotation = function(str) {
     if (str.type) return str;
+    if (!str.split) debugger;
 
     return {
       type: str.split("/")[0],
@@ -103,10 +104,30 @@ describe("Parser", function() {
   ];
 
   var validStatements = [
-    ["IDENT/a", ":=", "IDENT/b"],
-    ["BEGIN", "END"],
-    ["CALL", "IDENT/a"],
-    ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"]
+    {tokens: ["IDENT/a", ":=", "IDENT/b"], tree: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+    }},
+    {tokens: ["BEGIN", "END"], tree: {
+        type: "statement-block"
+    }},
+    {tokens: ["CALL", "IDENT/a"], tree: {
+        type: "call",
+        ident: ["a"]
+    }},
+    {tokens: ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"], tree: {
+        type: "if",
+        condition: [{
+          type: "odd",
+          expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
+        }],
+        statement: [{
+          type: "lasgn",
+          ident: ["a"],
+          expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+        }]
+    }}
   ];
 
   validExpressions.forEach(function(validExpression) {
@@ -155,32 +176,139 @@ describe("Parser", function() {
     }]
   }); // es un programa valido
 
-  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], true); // es un programa valido
+  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      procedure: [{
+        type: "procedure",
+        name: ["a"],
+        block: [{
+          type: "block",
+          statement: [{
+            type: "lasgn",
+            ident: ["a"],
+            expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+          }]
+        }]
+      }]
+    }]
+  }); // es un programa valido
   testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ";", ".", "EOF"], false); // NO es un programa valido
 
-  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", "PROCEDURE", "IDENT/xxx", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], true); // es un programa valido
+  testParse(["PROCEDURE", "IDENT/a", ";","IDENT/a", ":=", "IDENT/b", ";", "PROCEDURE", "IDENT/xxx", ";","IDENT/a", ":=", "IDENT/b", ";", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      procedure: [{
+        type: "procedure",
+        name: ["a"],
+        block: [{
+          type: "block",
+          statement: [{
+            type: "lasgn",
+            ident: ["a"],
+            expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+          }]
+        }]
+      }, {
+        type: "procedure",
+        name: ["xxx"],
+        block: [{
+          type: "block",
+          statement: [{
+            type: "lasgn",
+            ident: ["a"],
+            expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+          }]
+        }]
+      }]
+    }]    
+  }); // es un programa valido
 
-  testParse(["IDENT/a", ":=", "IDENT/b", ".", "EOF"], true); // es un programa valido
+  testParse(["IDENT/a", ":=", "IDENT/b", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      statement: [{
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+      }]
+    }]
+  }); // es un programa valido
   testParse(["IDENT/a", ":=", ".", "EOF"], false); // no es un programa valido
 
-  testParse(["BEGIN", "END", ".", "EOF"], true); // es un programa valido
+  testParse(["BEGIN", "END", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      statement: [{
+        type: "statement-block"
+      }]
+    }]
+  }); // es un programa valido
   testParse(["BEGIN", "END", "END", ".", "EOF"], false); // no es un programa valido
   testParse(["BEGIN", ".", "EOF"], false); // no es un programa valido
 
   validStatements.forEach(function(statement) {
-    testParse(["BEGIN", statement, "END", ".", "EOF"], true); // es un programa valido
+    testParse(["BEGIN", statement.tokens, "END", ".", "EOF"], {
+      type: "program",
+      block: [{
+        type: "block",
+        statement: [{
+          type: "statement-block",
+          statement: [statement.tree]
+        }]
+      }]
+    }); // es un programa valido
     validStatements.forEach(function(statement2) {
-      testParse(["BEGIN", statement, ";", statement2, "END", ".", "EOF"], true); // es un programa valido
+      testParse(["BEGIN", statement.tokens, ";", statement2.tokens, "END", ".", "EOF"], {
+        type: "program",
+        block: [{
+          type: "block",
+          statement: [{
+            type: "statement-block",
+            statement: [statement.tree, statement2.tree]
+          }]
+        }]
+      }); // es un programa valido
     });
   });
 
   testParse(["IDENT/a", ":=", "IDENT/b", "EOF"], false); // NO es un programa valido porque le falta .
 
-  testParse(["CALL", "IDENT/a", ".", "EOF"], true); // es un programa valido
+  testParse(["CALL", "IDENT/a", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      statement: [{
+        type: "call",
+        ident: ["a"]
+      }]
+    }]
+  }); // es un programa valido
   testParse(["CALL", "NUMBER/4", ".", "EOF"], false); // NO un programa valido
   testParse(["CALL", ".", "EOF"], false); // NO un programa valido
 
-  testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], true);
+  testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], {
+    type: "program",
+    block: [{
+      type: "block",
+      statement: [{
+        type: "if",
+        condition: [{
+          type: "odd",
+          expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
+        }],
+        statement: [{
+          type: "lasgn",
+          ident: ["a"],
+          expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+        }]
+      }]
+    }]
+  });
 
   var conditions = [
     ["ODD", "NUMBER/4"],
@@ -199,11 +327,11 @@ describe("Parser", function() {
 
   validStatements.forEach(function(statement) {
     conditions.forEach(function(condition) {
-      testParse(["IF", condition, "THEN", statement, "END", ".", "EOF"], true);
-      testParse(["WHILE", condition, "DO", statement, "END", ".", "EOF"], true);
+      testParse(["IF", condition, "THEN", statement.tokens, "END", ".", "EOF"], true);
+      testParse(["WHILE", condition, "DO", statement.tokens, "END", ".", "EOF"], true);
     });
 
-    testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement, "END", ".", "EOF"], false);
+    testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement.tokens, "END", ".", "EOF"], false);
   });
 
 });

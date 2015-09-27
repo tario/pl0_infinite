@@ -193,8 +193,12 @@ window.PL0Infinite = (function() {
 
     var readCondition = function() {
       if (token.type ===  "ODD") {
-        readToken("ODD");
-        readToken("NUMBER");
+        child("condition", "odd", function() {
+          readToken("ODD");
+          child("expression", "expression", function() {
+            readExpression();
+          });
+        });
       } else {
         readExpression();
         readOneOf(["=","<>","<","<=",">",">="], "comparator");
@@ -204,9 +208,11 @@ window.PL0Infinite = (function() {
 
     var readStatement = function() {
       if (token.type === "BEGIN") {
-        readToken("BEGIN"); 
-          repeat(readStatement, ";");
-        readToken("END");
+        child("statement", "statement-block", function() {
+          readToken("BEGIN"); 
+            repeat(readStatement, ";");
+          readToken("END");
+        });
       } else if (token.type === "IDENT") {
 
         child("statement", "lasgn", function() {
@@ -218,11 +224,15 @@ window.PL0Infinite = (function() {
         });
 
       } else if (token.type === "CALL") {
-        readToken("CALL"); readToken("IDENT");
+        child("statement", "call", function() {
+          readToken("CALL"); currentNode.attr("ident", readToken("IDENT").value);
+        });
       } else if (token.type === "IF") {
-        readToken("IF"); readCondition(); readToken("THEN");
-          readStatement();
-        readToken("END");
+        child("statement", "if", function() {
+          readToken("IF"); readCondition(); readToken("THEN");
+            readStatement();
+          readToken("END");
+        });
       } else if (token.type === "WHILE") {
         readToken("WHILE"); readCondition(); readToken("DO");
           readStatement();
@@ -257,11 +267,14 @@ window.PL0Infinite = (function() {
 
         while(1) {
           if (token.type === "PROCEDURE") {
-            readToken("PROCEDURE");
-            readToken("IDENT");
-            readToken(";");
-            readBlock();
-            readToken(";");
+
+            child("procedure", "procedure", function() {
+              readToken("PROCEDURE");
+              currentNode.attr("name", readToken("IDENT").value);
+              readToken(";");
+              readBlock();
+              readToken(";");
+            });
           } else {
             break;
           }
