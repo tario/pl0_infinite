@@ -20,6 +20,7 @@ window.PL0Infinite = (function() {
       [/^[0-9]$/, "Z2"],
       [/^=$/, "Z4"],
       [/^<$/, "Z3"],
+      [/^>$/, "Z3"],
       [/^:$/, "Z6"],
       [/^[.,;<>+\-*\/\(\)]$/, "Z5"],
       [/^\"$/ /*"*/, "ZSTR", {skip: true}],
@@ -46,6 +47,7 @@ window.PL0Infinite = (function() {
     ],
     Z4: [
       [/^>$/, "Z4"],
+      [/^<$/, "Z4"],
       [/^.?$/, "S", {emit: tokenSelf}]
     ],
     Z5: [
@@ -201,7 +203,7 @@ window.PL0Infinite = (function() {
         });
       } else {
         readExpression();
-        readOneOf(["=","<>","<","<=",">",">="], "comparator");
+        readOneOf(["=","<>","<","<=",">",">=", "=<", "=>"], "comparator");
         readExpression();
       }
     };
