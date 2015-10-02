@@ -29,8 +29,8 @@ window.PL0Infinite = (function() {
     Z1: [
       [/^[a-zA-Z0-9]$/, "Z1"],
       [/^.?$/, "S", {emit: function(token) {
-          if (keywords.indexOf(token) !== -1) {
-            return {type: token, value: token};
+          if (keywords.indexOf(token.toUpperCase()) !== -1) {
+            return {type: token.toUpperCase(), value: token};
           } else {
             return {type: 'IDENT', value: token};
           }
