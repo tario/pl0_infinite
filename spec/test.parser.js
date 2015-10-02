@@ -116,7 +116,7 @@ describe("Parser", function() {
         type: "call",
         ident: ["a"]
     }},
-    {tokens: ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END"], tree: {
+    {tokens: ["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b"], tree: {
         type: "if",
         condition: [{
           type: "odd",
@@ -291,7 +291,7 @@ describe("Parser", function() {
   testParse(["CALL", "NUMBER/4", ".", "EOF"], false); // NO un programa valido
   testParse(["CALL", ".", "EOF"], false); // NO un programa valido
 
-  testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", "END", ".", "EOF"], {
+  testParse(["IF", "ODD", "NUMBER/4", "THEN", "IDENT/a", ":=", "IDENT/b", ".", "EOF"], {
     type: "program",
     block: [{
       type: "block",
@@ -327,11 +327,11 @@ describe("Parser", function() {
 
   validStatements.forEach(function(statement) {
     conditions.forEach(function(condition) {
-      testParse(["IF", condition, "THEN", statement.tokens, "END", ".", "EOF"], true);
-      testParse(["WHILE", condition, "DO", statement.tokens, "END", ".", "EOF"], true);
+      testParse(["IF", condition, "THEN", statement.tokens, ".", "EOF"], true);
+      testParse(["WHILE", condition, "DO", statement.tokens, ".", "EOF"], true);
     });
 
-    testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement.tokens, "END", ".", "EOF"], false);
+    testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement.tokens, ".", "EOF"], false);
   });
 
 });

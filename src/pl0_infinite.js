@@ -231,12 +231,10 @@ window.PL0Infinite = (function() {
         child("statement", "if", function() {
           readToken("IF"); readCondition(); readToken("THEN");
             readStatement();
-          readToken("END");
         });
       } else if (token.type === "WHILE") {
         readToken("WHILE"); readCondition(); readToken("DO");
           readStatement();
-        readToken("END");
       }
    };
 
