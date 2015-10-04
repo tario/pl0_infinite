@@ -62,7 +62,6 @@ describe("Parser", function() {
             } catch (e) {
               console.log(JSON.stringify(result, null, 4));
               console.log(JSON.stringify(valid, null, 4));
-              debugger;
               throw e;
             }
           })
@@ -311,24 +310,47 @@ describe("Parser", function() {
   });
 
   var conditions = [
-    ["ODD", "NUMBER/4"],
-    ["NUMBER/4", ">", "NUMBER/3"],
-    ["IDENT/Z", "=", "NUMBER/10"],
-    ["IDENT/Z", "=", "NUMBER/10"],
-    ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"],
-    ["(", "IDENT/M", "+", "NUMBER/1", "-", "IDENT/Q", ")", "<=", "NUMBER/10"],
-    ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"],
-    ["-", "NUMBER/1", "<=", "NUMBER/10"],
-    ["+", "NUMBER/1", "<=", "NUMBER/10"],
-    ["IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"],
-    ["IDENT/M", {type: "/", value: "/"}, "NUMBER/2", "<=", "NUMBER/10"],
-    ["IDENT/Z", "+", "IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"]
+    {tokens: ["ODD", "NUMBER/4"], tree: {
+      type: "odd",
+      expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
+    }},
+    {tokens: ["NUMBER/4", ">", "NUMBER/3"]},
+    {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
+    {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
+    {tokens: ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"]},
+    {tokens: ["(", "IDENT/M", "+", "NUMBER/1", "-", "IDENT/Q", ")", "<=", "NUMBER/10"]},
+    {tokens: ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"]},
+    {tokens: ["-", "NUMBER/1", "<=", "NUMBER/10"]},
+    {tokens: ["+", "NUMBER/1", "<=", "NUMBER/10"]},
+    {tokens: ["IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"]},
+    {tokens: ["IDENT/M", {type: "/", value: "/"}, "NUMBER/2", "<=", "NUMBER/10"]},
+    {tokens: ["IDENT/Z", "+", "IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"]}
   ];
 
   validStatements.forEach(function(statement) {
     conditions.forEach(function(condition) {
-      testParse(["IF", condition, "THEN", statement.tokens, ".", "EOF"], true);
-      testParse(["WHILE", condition, "DO", statement.tokens, ".", "EOF"], true);
+      testParse(["IF", condition.tokens, "THEN", statement.tokens, ".", "EOF"], condition.tree ? {
+        type: "program",
+        block: [{
+          type: "block",
+          statement: [{
+            type: "if",
+            condition: [condition.tree],
+            statement: [statement.tree]
+          }]
+        }]
+      } : true);
+      testParse(["WHILE", condition.tokens, "DO", statement.tokens, ".", "EOF"], condition.tree ? {
+        type: "program",
+        block: [{
+          type: "block",
+          statement: [{
+            type: "while",
+            condition: [condition.tree],
+            statement: [statement.tree]
+          }]
+        }]
+      } : true);
     });
 
     testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement.tokens, ".", "EOF"], false);

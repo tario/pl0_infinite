@@ -235,8 +235,10 @@ window.PL0Infinite = (function() {
             readStatement();
         });
       } else if (token.type === "WHILE") {
-        readToken("WHILE"); readCondition(); readToken("DO");
-          readStatement();
+        child("statement", "while", function() {
+          readToken("WHILE"); readCondition(); readToken("DO");
+            readStatement();
+        });
       }
    };
 
