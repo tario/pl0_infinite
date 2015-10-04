@@ -314,7 +314,14 @@ describe("Parser", function() {
       type: "odd",
       expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
     }},
-    {tokens: ["NUMBER/4", ">", "NUMBER/3"]},
+    {tokens: ["NUMBER/4", ">", "NUMBER/3"], tree: {
+      type: "compare",
+      operator: ['>'],
+      expression: [
+        {type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] },
+        {type: "expression", term: [{type: "product", factor: [{type:"number", value: [3]}] }] }
+      ]
+    }},
     {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
     {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
     {tokens: ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"]},

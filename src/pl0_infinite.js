@@ -153,10 +153,11 @@ window.PL0Infinite = (function() {
         }
     };
 
-    var readOneOf = function(array, tokenName) {
+    var readOneOf = function(array, tokenName, cb) {
       if (array.indexOf(token.type) === -1) {
         throw {expected: [tokenName], found: token};
       }
+      if (cb) cb(token);
       token = scanner.nextToken();
     };
 
@@ -202,9 +203,13 @@ window.PL0Infinite = (function() {
           });
         });
       } else {
-        readExpression();
-        readOneOf(["=","<>","<","<=",">",">=", "=<", "=>"], "comparator");
-        readExpression();
+        child("condition", "compare", function() {
+          child("expression", "expression", readExpression);
+          readOneOf(["=","<>","<","<=",">",">=", "=<", "=>"], "comparator", function(token) {
+            currentNode.attr("operator", token.type);
+          });
+          child("expression", "expression", readExpression);
+        });
       }
     };
 
