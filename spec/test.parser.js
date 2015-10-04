@@ -322,9 +322,29 @@ describe("Parser", function() {
         {type: "expression", term: [{type: "product", factor: [{type:"number", value: [3]}] }] }
       ]
     }},
-    {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
-    {tokens: ["IDENT/Z", "=", "NUMBER/10"]},
-    {tokens: ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"]},
+    {tokens: ["IDENT/Z", "=", "NUMBER/10"], tree: {
+      type: "compare",
+      operator: ['='],
+      expression: [
+        {type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["Z"]}] }] },
+        {type: "expression", term: [{type: "product", factor: [{type:"number", value: [10]}] }] }
+      ]
+    }},
+    {tokens: ["(", "IDENT/M", "+", "NUMBER/1", ")", "<=", "NUMBER/10"], tree: {
+      type: "compare",
+      operator: ['<='],
+      expression: [
+        {type: "expression", term: [
+          {type: "product", factor: [
+            {type: "expression", term: [
+              {type: "product", factor: [{type:"ident", value: ["M"]}] },
+              {type: "product", factor: [{type:"number", value: [1]}] }
+            ]}
+          ]}
+        ]},
+        {type: "expression", term: [{type: "product", factor: [{type:"number", value: [10]}] }] }
+      ]
+    }},
     {tokens: ["(", "IDENT/M", "+", "NUMBER/1", "-", "IDENT/Q", ")", "<=", "NUMBER/10"]},
     {tokens: ["IDENT/M", "+", "NUMBER/1", "<=", "NUMBER/10"]},
     {tokens: ["-", "NUMBER/1", "<=", "NUMBER/10"]},
