@@ -176,6 +176,7 @@ window.PL0Infinite = (function() {
         readToken("(");
           child("factor", "expression", function() {
             readExpression();
+            if (separator === "/") currentNode.attr("divide", true);
           });
         readToken(")");
       } else if (token.type === "IDENT") {

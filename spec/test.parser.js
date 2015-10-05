@@ -24,10 +24,12 @@ describe("Parser", function() {
     return a.concat(b);
   };
 
+  var z = 0;
   var testParse = function(_tokens, valid) {
     var tokens = _tokens.reduce(concatSubArrays).map(convertNotation);
 
-    describe("when parse " + _tokens.join(" "), function() {
+    z++;
+    describe("when parse " + z, function() {
       beforeEach(function() {
         this.builder = new PL0Infinite.ASTBuilder();
       });
@@ -395,6 +397,26 @@ describe("Parser", function() {
         ]}
       ]
     }},
+    {tokens: ["IDENT/M", {type: "/", value: "/"}, "(", "NUMBER/2", "+", "IDENT/Q", ")", "<=", "NUMBER/10"], tree: {
+      type: "compare",
+      operator: ['<='],
+      expression: [
+        {type: "expression", term: [
+          {type: "product", factor: [
+            {type:"ident", value: ["M"]},
+            {type:"expression", term: [
+                {type: "product", factor: [{type:"number", value: [2]}] },
+                {type: "product", factor: [{type:"ident", value: ["Q"]}] }
+              ],
+              divide: [true]
+            }]
+          }
+        ]},
+        {type: "expression", term: [
+          {type: "product", factor: [{type:"number", value: [10]}] }
+        ]}
+      ]
+    }},    
     {tokens: ["IDENT/Z", "+", "IDENT/M", "*", "NUMBER/2", "<=", "NUMBER/10"], tree: {
       type: "compare",
       operator: ['<='],
