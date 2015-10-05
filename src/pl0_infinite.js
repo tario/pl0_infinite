@@ -140,12 +140,22 @@ window.PL0Infinite = (function() {
         return currToken;
     }
 
-    var repeat = function(fcn, separator) {
+    var repeat = function(fcn, separator, options) {
+        options = options || {};
         var separators = Array.isArray(separator) ? separator : [separator];
+        var lastSeparator;
+
+        if (options.start) {
+          if (separators.indexOf(token.type)!==-1) {
+            lastSeparator = token.type;
+            readToken(token.type);
+          }
+        }
 
         while(1) {
-          fcn();
+          fcn(lastSeparator);
           if (separators.indexOf(token.type)!==-1) {
+            lastSeparator = token.type;
             readToken(token.type);
           } else {
             break;
@@ -161,7 +171,7 @@ window.PL0Infinite = (function() {
       token = scanner.nextToken();
     };
 
-    var readFactor = function() {
+    var readFactor = function(separator) {
       if (token.type === "(") {
         readToken("(");
           child("factor", "expression", function() {
@@ -171,27 +181,27 @@ window.PL0Infinite = (function() {
       } else if (token.type === "IDENT") {
         child("factor", "ident", function() {
           currentNode.attr("value", readToken("IDENT").value);
+          if (separator === "/") currentNode.attr("divide", true);
         });
       } else if (token.type === "NUMBER") {
         child("factor", "number", function() {
           currentNode.attr("value", parseInt(readToken("NUMBER").value));
+          if (separator === "/") currentNode.attr("divide", true);
         });
       } else {
         throw {expected: ["IDENT", "NUMBER", "("], found: token};
       }
     }
 
-    var readTerm = function() {
+    var readTerm = function(separator) {
       child("term", "product", function() {
+        if (separator === "-") currentNode.attr("negative", true);
         repeat(readFactor, ["*", "/"]);
       });
     }
 
     var readExpression = function() {
-      if (token.type === "+" || token.type === "-") {
-        readToken(token.type);
-      }
-      repeat(readTerm, ["+", "-"]);
+      repeat(readTerm, ["+", "-"], {start: true});
     }
 
     var readCondition = function() {
