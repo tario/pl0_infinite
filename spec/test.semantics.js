@@ -88,40 +88,44 @@ describe("Semantic", function() {
     };
   });
 
-  testVariant(function(version) {
-    var replaceConst = _replace({
-        type: "block",
-        _const: [["a", 4]],
-        statement: [{
-          type: "if",
-          condition: [{
-            type: "odd",
-            expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
-          }],
+  var testConst = function(constName, value) {
+    testVariant(function(version) {
+      var replaceConst = _replace({
+          type: "block",
+          _const: [[constName, value]],
           statement: [{
-            type: "statement-block"
+            type: "if",
+            condition: [{
+              type: "odd",
+              expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [constName]}] }] }]
+            }],
+            statement: [{
+              type: "statement-block"
+            }]
           }]
-        }]
-      }, { 
-        type: "block",
-        statement: [{
-          type: "if",
-          condition: [{
-            type: "odd",
-            expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
-          }],
+        }, { 
+          type: "block",
           statement: [{
-            type: "statement-block"
+            type: "if",
+            condition: [{
+              type: "odd",
+              expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [value]}] }] }]
+            }],
+            statement: [{
+              type: "statement-block"
+            }]
           }]
-        }]
-      });
-    
-    return {
-      type: "program", 
-      block: [replaceConst(version)]
-    };
-  });
+        });
+      
+      return {
+        type: "program", 
+        block: [replaceConst(version)]
+      };
+    });
+  };
 
+  testConst("a", 4);
+  testConst("a", 5);
 
 });
 

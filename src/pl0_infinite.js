@@ -312,33 +312,38 @@ window.PL0Infinite = (function() {
 
   var SemanticAnalyzer = function(options) {
     this.output = options.output;
+    this.context = {};
   };
 
-  var wrapNode = function(ch) {
+  var wrapNode = function(ch, context) {
     return {
       child: function(varname, type, cb) {
 
         if (type === "ident") {
           ch.child(varname, "number", function(chch) {
-            chch.attr("value", 4);
+            chch.attr("value", context.constValue);
           });
           return;
         }
 
         ch.child(varname, type, function(ch) {
-          cb(wrapNode(ch));
+          cb(wrapNode(ch, context));
         });
       },
       attr: function(varname, value) {
-        if (varname === "_const") return;
+        if (varname === "_const") {
+          context.constValue = value[1];
+          return;
+        }
         ch.attr(varname, value);
       }
     };
   };
 
   SemanticAnalyzer.prototype.child = function(variable, type, cb) {
+    var self = this;
     this.output.child(variable, type, function(ch) {
-      cb(wrapNode(ch));
+      cb(wrapNode(ch, self.context));
     });
   };
 
