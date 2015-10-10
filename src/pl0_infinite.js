@@ -312,7 +312,7 @@ window.PL0Infinite = (function() {
 
   var SemanticAnalyzer = function(options) {
     this.output = options.output;
-    this.context = {};
+    this.context = {consts: {}};
   };
 
   var wrapNode = function(ch, context) {
@@ -321,7 +321,11 @@ window.PL0Infinite = (function() {
 
         if (type === "ident") {
           ch.child(varname, "number", function(chch) {
-            chch.attr("value", context.constValue);
+            cb({
+              attr: function(varname, value) {
+                chch.attr("value", context.consts[value]);
+              }
+            });
           });
           return;
         }
@@ -332,7 +336,7 @@ window.PL0Infinite = (function() {
       },
       attr: function(varname, value) {
         if (varname === "_const") {
-          context.constValue = value[1];
+          context.consts[value[0]] = value[1];
           return;
         }
         ch.attr(varname, value);
