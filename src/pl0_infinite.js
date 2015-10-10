@@ -310,6 +310,32 @@ window.PL0Infinite = (function() {
 
   pl0.DefaultParser = DefaultParser;
 
+  var SemanticAnalyzer = function(options) {
+    this.output = options.output;
+  };
+
+  var wrapNode = function(ch) {
+    return {
+      child: function(type, varname, cb) {
+        ch.child(type, varname, function(ch) {
+          cb(wrapNode(ch));
+        });
+      },
+      attr: function(varname, value) {
+        if (varname === "_const") return;
+        ch.attr(varname, value);
+      }
+    };
+  };
+
+  SemanticAnalyzer.prototype.child = function(variable, type, cb) {
+    this.output.child(variable, type, function(ch) {
+      cb(wrapNode(ch));
+    });
+  };
+
+  pl0.SemanticAnalyzer = SemanticAnalyzer;
+
   var NodeBuilder = function(node) {
     return {
       attr: function(keyName, obj) {
