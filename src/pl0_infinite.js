@@ -316,8 +316,16 @@ window.PL0Infinite = (function() {
 
   var wrapNode = function(ch) {
     return {
-      child: function(type, varname, cb) {
-        ch.child(type, varname, function(ch) {
+      child: function(varname, type, cb) {
+
+        if (type === "ident") {
+          ch.child(varname, "number", function(chch) {
+            chch.attr("value", 4);
+          });
+          return;
+        }
+
+        ch.child(varname, type, function(ch) {
           cb(wrapNode(ch));
         });
       },

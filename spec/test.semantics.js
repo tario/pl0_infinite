@@ -75,14 +75,50 @@ describe("Semantic", function() {
   };
 
   testVariant(function(version) {
-    return {
-      type: "program", 
-      block: [_replace({
+    var removeConst = _replace({
         type: "block",
         _const: [["a", 4]]
       }, { 
         type: "block"
-      })(version)]
+      });
+
+    return {
+      type: "program", 
+      block: [removeConst(version)]
+    };
+  });
+
+  testVariant(function(version) {
+    var replaceConst = _replace({
+        type: "block",
+        _const: [["a", 4]],
+        statement: [{
+          type: "if",
+          condition: [{
+            type: "odd",
+            expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+          }],
+          statement: [{
+            type: "statement-block"
+          }]
+        }]
+      }, { 
+        type: "block",
+        statement: [{
+          type: "if",
+          condition: [{
+            type: "odd",
+            expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [4]}] }] }]
+          }],
+          statement: [{
+            type: "statement-block"
+          }]
+        }]
+      });
+    
+    return {
+      type: "program", 
+      block: [replaceConst(version)]
     };
   });
 
