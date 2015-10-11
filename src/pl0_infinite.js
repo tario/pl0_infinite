@@ -332,15 +332,15 @@ window.PL0Infinite = (function() {
 
         if (type === "procedure") {
           ch.child(varname, type, function(ch) {
-            cb(wrapNode(ch, context));
-          });
-        } else {
-          ch.child(varname, type, function(ch) {
             var parentConsts = context.consts;
             context.consts = Object.create(parentConsts);
             cb(wrapNode(ch, context));
 
             context.consts = parentConsts;
+          });
+        } else {
+          ch.child(varname, type, function(ch) {
+            cb(wrapNode(ch, context));
           });
         }
       },
