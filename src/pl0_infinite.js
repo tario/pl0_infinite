@@ -312,7 +312,7 @@ window.PL0Infinite = (function() {
 
   var SemanticAnalyzer = function(options) {
     this.output = options.output;
-    this.context = {consts: {}, vars: {}, nextOffset: 0};
+    this.context = {currentFrame: {}, nextOffset: 0};
   };
 
   var wrapNode = function(ch, context) {
@@ -323,13 +323,14 @@ window.PL0Infinite = (function() {
 
           cb({
             attr: function(varname_, value) {
-              if (typeof context.vars[value] !== 'undefined') {
+              var symbol = context.currentFrame[value];
+              if (symbol.type === '_var') {
                 ch.child(varname, "offset", function(chch) {
-                  chch.attr("offset", context.vars[value]);
+                  chch.attr("offset", symbol.offset);
                 });
               } else {
                 ch.child(varname, "number", function(chch) {
-                  chch.attr("value", context.consts[value]);
+                  chch.attr("value", symbol.value);
                 });
               }
             }
@@ -339,14 +340,11 @@ window.PL0Infinite = (function() {
 
         if (type === "procedure") {
           ch.child(varname, type, function(ch) {
-            var parentConsts = context.consts;
-            var parentVars = context.vars;
-            context.consts = Object.create(parentConsts);
-            context.vars = Object.create(parentVars);
+            var parentFrame = context.currentFrame;
+            context.currentFrame = Object.create(parentFrame);
             cb(wrapNode(ch, context));
 
-            context.consts = parentConsts;
-            context.vars = parentVars;
+            context.currentFrame = parentFrame;
           });
         } else {
           ch.child(varname, type, function(ch) {
@@ -356,12 +354,12 @@ window.PL0Infinite = (function() {
       },
       attr: function(varname, value) {
         if (varname === "_var") {
-          context.vars[value] = context.nextOffset;
+          context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
           context.nextOffset++;
           return;
         }
         if (varname === "_const") {
-          context.consts[value[0]] = value[1];
+          context.currentFrame[value[0]] = {type: "_const", value: value[1]};
           return;
         }
         ch.attr(varname, value);
