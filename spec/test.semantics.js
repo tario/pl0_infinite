@@ -261,11 +261,54 @@ describe("Semantic", function() {
     });
   };
 
+  var testVars = function(vars) {
+    describe("when vars " + vars.join(","), function() {
+      vars.forEach(function(varname, offset) {
+        testVariant(function(version) {
+          var replaceVars = _replace({
+              type: "block",
+              _var: vars,
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [varname]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            }, { 
+              type: "block",
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [offset]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVars(version)]
+          };
+        });
+      });
+    });
+  };
+
   testConst([["a", 4]]);
   testConst([["a", 5]]);
   testConst([["a", 6], ["b", 7]]);
 
   testConstTwoLevels([["a", 4], ["b", 7]], [["a", 5]], {a: 4, b: 7}, {a: 5, b: 7});
 
+  testVars(["a"]);
+  testVars(["a", "b"]);
+  testVars(["a", "b", "c"]);
 });
 
