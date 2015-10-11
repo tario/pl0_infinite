@@ -88,50 +88,184 @@ describe("Semantic", function() {
     };
   });
 
-  var testConst = function(consts) {
-    consts.forEach(function(keyvalue) {
-      var constName = keyvalue[0];
-      var value = keyvalue[1];
+  var first = function(x){ return x[0];};
 
-      testVariant(function(version) {
-        var replaceConst = _replace({
-            type: "block",
-            _const: consts,
-            statement: [{
-              type: "if",
-              condition: [{
-                type: "odd",
-                expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [constName]}] }] }]
-              }],
+  var testConst = function(consts) {
+    describe("when constants " + consts.map(first).join(","), function() {
+
+      consts.forEach(function(keyvalue) {
+        var constName = keyvalue[0];
+        var value = keyvalue[1];
+
+        testVariant(function(version) {
+          var replaceConst = _replace({
+              type: "block",
+              _const: consts,
               statement: [{
-                type: "statement-block"
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [constName]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
               }]
-            }]
-          }, { 
-            type: "block",
-            statement: [{
-              type: "if",
-              condition: [{
-                type: "odd",
-                expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [value]}] }] }]
-              }],
+            }, { 
+              type: "block",
               statement: [{
-                type: "statement-block"
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [value]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
               }]
-            }]
-          });
-        
-        return {
-          type: "program", 
-          block: [replaceConst(version)]
-        };
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceConst(version)]
+          };
+        });
       });
+    });
+  };
+
+  var testConstTwoLevels = function(consts1, consts2, testValues1, testValues2) {
+    describe("when constants " + consts1.map(first).join(",") + " and " + consts2.map(first).join(","), function() {
+      Object.keys(testValues2).forEach(function(testValue) {
+        var constName = testValue;
+        var value = testValues2[testValue];
+
+        testVariant(function(version) {
+          var replaceConst = _replace({
+              type: "block",
+              _const: consts1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _const: consts2,
+                  statement: [{
+                    type: "if",
+                    condition: [{
+                      type: "odd",
+                      expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [constName]}] }] }]
+                    }],
+                    statement: [{
+                      type: "statement-block"
+                    }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: "if",
+                    condition: [{
+                      type: "odd",
+                      expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [value]}] }] }]
+                    }],
+                    statement: [{
+                      type: "statement-block"
+                    }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceConst(version)]
+          };
+        });
+      });
+
+      Object.keys(testValues1).forEach(function(testValue) {
+        var constName = testValue;
+        var value = testValues1[testValue];
+
+        testVariant(function(version) {
+          var replaceConst = _replace({
+              type: "block",
+              _const: consts1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _const: consts2,
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [constName]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: [value]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceConst(version)]
+          };
+        });
+      });
+ 
+
+
     });
   };
 
   testConst([["a", 4]]);
   testConst([["a", 5]]);
   testConst([["a", 6], ["b", 7]]);
+
+  testConstTwoLevels([["a", 4], ["b", 7]], [["a", 5]], {a: 4, b: 7}, {a: 5, b: 7});
 
 });
 

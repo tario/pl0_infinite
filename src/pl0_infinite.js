@@ -330,9 +330,19 @@ window.PL0Infinite = (function() {
           return;
         }
 
-        ch.child(varname, type, function(ch) {
-          cb(wrapNode(ch, context));
-        });
+        if (type === "procedure") {
+          ch.child(varname, type, function(ch) {
+            cb(wrapNode(ch, context));
+          });
+        } else {
+          ch.child(varname, type, function(ch) {
+            var parentConsts = context.consts;
+            context.consts = Object.create(parentConsts);
+            cb(wrapNode(ch, context));
+
+            context.consts = parentConsts;
+          });
+        }
       },
       attr: function(varname, value) {
         if (varname === "_const") {
