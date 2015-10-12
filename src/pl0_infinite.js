@@ -315,94 +315,8 @@ window.PL0Infinite = (function() {
     this.context = {currentFrame: {}, nextOffset: 0};
   };
 
-  var wrapLasgnNode = function(ch, context) {
-    return {
-      child: function(varname, type, cb) {
-        ch.child(varname, type, function(ch) {
-          cb(wrapNode(ch, context));
-        });
-      },
-      attr: function(varname, value) {
-        if (varname === "ident") {
-          var symbol = context.currentFrame[value];
-          ch.attr("offset", symbol.offset);
-          return;
-        }
-        ch.attr(varname, value);
-      }
-    };
-  };
-
-  var wrapProcedureNode = function(ch, context) {
-    return {
-      child: function(varname, type, cb) {
-        if (type === "block") {
-          ch.child(varname, type, function(ch) {
-            var parentFrame = context.currentFrame;
-            context.currentFrame = Object.create(parentFrame);
-            cb(wrapBlockNode(ch, context));
-
-            context.currentFrame = parentFrame;
-          });
-        } else if (type === "lasgn") {
-          ch.child(varname, type, function(ch) {
-            cb(wrapLasgnNode(ch, context));
-          });
-        } else if (type === "procedure") { 
-          ch.child(varname, type, function(ch) {
-            cb(wrapProcedureNode(ch, context));
-          });
-        } else {
-          ch.child(varname, type, function(ch) {
-            cb(wrapNode(ch, context));
-          });
-        }
-      },
-      attr: function(varname, value) {
-        if (varname === "name") {
-          ch.attr("number", 0);
-          return;
-        }
-        ch.attr(varname, value);
-      }
-    };
-  };
-
-  var wrapBlockNode = function(ch, context) {
-    return {
-      child: function(varname, type, cb) {
-        if (type === "lasgn") {
-          ch.child(varname, type, function(ch) {
-            cb(wrapLasgnNode(ch, context));
-          });
-        } else if (type === "procedure") { 
-          ch.child(varname, type, function(ch) {
-            cb(wrapProcedureNode(ch, context));
-          });
-        } else {
-          ch.child(varname, type, function(ch) {
-            cb(wrapNode(ch, context));
-          });
-        }
-      },
-      attr: function(varname, value) {
-        if (varname === "_var") {
-          context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
-          context.nextOffset++;
-          return;
-        }
-        if (varname === "_const") {
-          context.currentFrame[value[0]] = {type: "_const", value: value[1]};
-          return;
-        }
-        ch.attr(varname, value);
-      }
-    };
-  };
-
-  var wrapNode = function(ch, context) {
-    return {
-      child: function(varname, type, cb) {
+  var childProcessor = function(ch, context) {
+    return function(varname, type, cb) {
 
         if (type === "ident") {
 
@@ -422,7 +336,7 @@ window.PL0Infinite = (function() {
           });
           return;
         }
-
+      
         if (type === "block") {
           ch.child(varname, type, function(ch) {
             var parentFrame = context.currentFrame;
@@ -435,12 +349,66 @@ window.PL0Infinite = (function() {
           ch.child(varname, type, function(ch) {
             cb(wrapLasgnNode(ch, context));
           });
+        } else if (type === "procedure") { 
+          ch.child(varname, type, function(ch) {
+            cb(wrapProcedureNode(ch, context));
+          });
         } else {
           ch.child(varname, type, function(ch) {
             cb(wrapNode(ch, context));
           });
         }
-      },
+    };
+  };
+
+  var wrapLasgnNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
+      attr: function(varname, value) {
+        if (varname === "ident") {
+          var symbol = context.currentFrame[value];
+          ch.attr("offset", symbol.offset);
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };
+
+  var wrapProcedureNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
+      attr: function(varname, value) {
+        if (varname === "name") {
+          ch.attr("number", 0);
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };
+
+  var wrapBlockNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
+      attr: function(varname, value) {
+        if (varname === "_var") {
+          context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
+          context.nextOffset++;
+          return;
+        }
+        if (varname === "_const") {
+          context.currentFrame[value[0]] = {type: "_const", value: value[1]};
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };
+
+  var wrapNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
       attr: function(varname, value) {
         ch.attr(varname, value);
       }
