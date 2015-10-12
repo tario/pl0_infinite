@@ -315,6 +315,28 @@ window.PL0Infinite = (function() {
     this.context = {currentFrame: {}, nextOffset: 0};
   };
 
+  var wrapBlockNode = function(ch, context) {
+    return {
+      child: function(varname, type, cb) {
+        ch.child(varname, type, function(ch) {
+          cb(wrapNode(ch, context));
+        });
+      },
+      attr: function(varname, value) {
+        if (varname === "_var") {
+          context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
+          context.nextOffset++;
+          return;
+        }
+        if (varname === "_const") {
+          context.currentFrame[value[0]] = {type: "_const", value: value[1]};
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };
+
   var wrapNode = function(ch, context) {
     return {
       child: function(varname, type, cb) {
@@ -338,11 +360,11 @@ window.PL0Infinite = (function() {
           return;
         }
 
-        if (type === "procedure") {
+        if (type === "block") {
           ch.child(varname, type, function(ch) {
             var parentFrame = context.currentFrame;
             context.currentFrame = Object.create(parentFrame);
-            cb(wrapNode(ch, context));
+            cb(wrapBlockNode(ch, context));
 
             context.currentFrame = parentFrame;
           });
@@ -353,15 +375,6 @@ window.PL0Infinite = (function() {
         }
       },
       attr: function(varname, value) {
-        if (varname === "_var") {
-          context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
-          context.nextOffset++;
-          return;
-        }
-        if (varname === "_const") {
-          context.currentFrame[value[0]] = {type: "_const", value: value[1]};
-          return;
-        }
         ch.attr(varname, value);
       }
     };
@@ -369,8 +382,13 @@ window.PL0Infinite = (function() {
 
   SemanticAnalyzer.prototype.child = function(variable, type, cb) {
     var self = this;
+
     this.output.child(variable, type, function(ch) {
-      cb(wrapNode(ch, self.context));
+      if (type === "block") {
+        cb(wrapBlockNode(ch, self.context));
+      } else {
+        cb(wrapNode(ch, self.context));
+      }
     });
   };
 
