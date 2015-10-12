@@ -301,6 +301,134 @@ describe("Semantic", function() {
     });
   };
 
+  var testVarsTwoLevels = function(vars1, vars2, testValues1, testValues2) {
+    describe("when vars " + vars1.join(",") + " and " + vars2.join(","), function() {
+      Object.keys(testValues2).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues2[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  statement: [{
+                    type: "if",
+                    condition: [{
+                      type: "odd",
+                      expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [varName]}] }] }]
+                    }],
+                    statement: [{
+                      type: "statement-block"
+                    }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: "if",
+                    condition: [{
+                      type: "odd",
+                      expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                    }],
+                    statement: [{
+                      type: "statement-block"
+                    }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+
+      Object.keys(testValues1).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues1[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [varName]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "if",
+                condition: [{
+                  type: "odd",
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                }],
+                statement: [{
+                  type: "statement-block"
+                }]
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+ 
+
+
+    });
+  };
+
+
   testConst([["a", 4]]);
   testConst([["a", 5]]);
   testConst([["a", 6], ["b", 7]]);
@@ -310,5 +438,7 @@ describe("Semantic", function() {
   testVars(["a"]);
   testVars(["a", "b"]);
   testVars(["a", "b", "c"]);
+
+  testVarsTwoLevels(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2})
 });
 
