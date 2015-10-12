@@ -336,15 +336,7 @@ window.PL0Infinite = (function() {
   var wrapBlockNode = function(ch, context) {
     return {
       child: function(varname, type, cb) {
-        if (type === "block") {
-          ch.child(varname, type, function(ch) {
-            var parentFrame = context.currentFrame;
-            context.currentFrame = Object.create(parentFrame);
-            cb(wrapBlockNode(ch, context));
-
-            context.currentFrame = parentFrame;
-          });
-        } else if (type === "lasgn") {
+        if (type === "lasgn") {
           ch.child(varname, type, function(ch) {
             cb(wrapLasgnNode(ch, context));
           });
