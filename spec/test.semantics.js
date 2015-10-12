@@ -169,7 +169,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{
@@ -229,7 +229,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{
@@ -336,7 +336,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{
@@ -396,7 +396,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{
@@ -459,7 +459,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{
@@ -509,7 +509,7 @@ describe("Semantic", function() {
               type: "block",
               procedure: [{
                 type: "procedure",
-                name: ["x"],
+                number: [0],
                 block: [{
                   type: "block",
                   statement: [{

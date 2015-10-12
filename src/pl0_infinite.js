@@ -333,12 +333,51 @@ window.PL0Infinite = (function() {
     };
   };
 
+  var wrapProcedureNode = function(ch, context) {
+    return {
+      child: function(varname, type, cb) {
+        if (type === "block") {
+          ch.child(varname, type, function(ch) {
+            var parentFrame = context.currentFrame;
+            context.currentFrame = Object.create(parentFrame);
+            cb(wrapBlockNode(ch, context));
+
+            context.currentFrame = parentFrame;
+          });
+        } else if (type === "lasgn") {
+          ch.child(varname, type, function(ch) {
+            cb(wrapLasgnNode(ch, context));
+          });
+        } else if (type === "procedure") { 
+          ch.child(varname, type, function(ch) {
+            cb(wrapProcedureNode(ch, context));
+          });
+        } else {
+          ch.child(varname, type, function(ch) {
+            cb(wrapNode(ch, context));
+          });
+        }
+      },
+      attr: function(varname, value) {
+        if (varname === "name") {
+          ch.attr("number", 0);
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };
+
   var wrapBlockNode = function(ch, context) {
     return {
       child: function(varname, type, cb) {
         if (type === "lasgn") {
           ch.child(varname, type, function(ch) {
             cb(wrapLasgnNode(ch, context));
+          });
+        } else if (type === "procedure") { 
+          ch.child(varname, type, function(ch) {
+            cb(wrapProcedureNode(ch, context));
           });
         } else {
           ch.child(varname, type, function(ch) {
