@@ -575,28 +575,26 @@ describe("Semantic", function() {
         testVariant(function(version) {
           var replaceVar = _replace({
               type: "block",
-              _var: vars1,
-              procedure: [{
+              procedure: vars1.map(makeProcedure).concat([{
                 type: "procedure",
                 name: ["x"],
                 block: [{
                   type: "block",
-                  _var: vars2,
                   procedure: vars2.map(makeProcedure),
                   statement: [{
                     type: "call",
                     ident: [varName]
                   }]
                 }]
-              }].concat(vars1.map(makeProcedure)),
+              }]),
               statement: [{
                 type: "statement-block"
               }]
             }, { 
               type: "block",
-              procedure: [{
+              procedure:  vars1.map(makeProcedureWithIndex(testValues1)).concat([{
                 type: "procedure",
-                number: [0],
+                number: [vars1.length],
                 block: [{
                   type: "block",
                   procedure: vars2.map(makeProcedureWithIndex(testValues2)),
@@ -605,7 +603,7 @@ describe("Semantic", function() {
                     number: [value]
                   }]
                 }]
-              }].concat(vars1.map(makeProcedureWithIndex(testValues1))),
+              }]),
               statement: [{
                 type: "statement-block"
               }]
@@ -625,28 +623,26 @@ describe("Semantic", function() {
         testVariant(function(version) {
           var replaceVar = _replace({
               type: "block",
-              _var: vars1,
-              procedure: [{
+              procedure: vars1.map(makeProcedure).concat([{
                 type: "procedure",
                 name: ["x"],
                 block: [{
                   type: "block",
-                  _var: vars2,
                   procedure: vars2.map(makeProcedure),
                   statement: [{
                     type: "statement-block"
                   }]
                 }]
-              }].concat(vars1.map(makeProcedure)),
+              }]),
               statement: [{
                 type: "call",
                 ident: [varName]
               }]
             }, { 
               type: "block",
-              procedure: [{
+              procedure: vars1.map(makeProcedureWithIndex(testValues1)).concat([{
                 type: "procedure",
-                number: [0],
+                number: [vars1.length],
                 block: [{
                   type: "block",
                   procedure: vars2.map(makeProcedureWithIndex(testValues2)),
@@ -654,7 +650,7 @@ describe("Semantic", function() {
                     type: "statement-block"
                   }]
                 }]
-              }].concat(vars1.map(makeProcedureWithIndex(testValues1))),
+              }]),
               statement: [{
                 type: "call",
                 number: [value]
@@ -687,7 +683,8 @@ describe("Semantic", function() {
   testVarsTwoLevelsLasgn(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2});
 
 
-  testProcedureTwoLevels(["a"], ["a", "b"], {a: 3}, {a: 1, b: 2});
+  testProcedureTwoLevels(["a"], ["a", "b"], {a: 0}, {a: 2, b: 3});
+  testProcedureTwoLevels(["a", "b"], ["a"], {a: 0, b: 1}, {a: 3, b: 1});
 
 });
 
