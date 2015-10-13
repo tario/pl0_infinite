@@ -537,6 +537,141 @@ describe("Semantic", function() {
   };
 
 
+  var testProcedureTwoLevels = function(vars1, vars2, testValues1, testValues2) {
+
+    var makeProcedure = function(name) {
+      return {
+        type: "procedure",
+        name: [name],
+        block: [{
+          type: "block",
+          statement: [{
+            type: "statement-block"
+          }]
+        }]
+      };
+    };
+
+    var makeProcedureWithIndex = function(array) {
+      return function(name) {
+        return {
+          type: "procedure",
+          number: [array[name]],
+          block: [{
+            type: "block",
+            statement: [{
+              type: "statement-block"
+            }]
+          }]
+        };
+      };
+    };
+
+    describe("when procedure " + vars1.join(",") + " and " + vars2.join(","), function() {
+      Object.keys(testValues2).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues2[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  procedure: vars2.map(makeProcedure),
+                  statement: [{
+                    type: "call",
+                    ident: [varName]
+                  }]
+                }]
+              }].concat(vars1.map(makeProcedure)),
+              statement: [{
+                type: "statement-block"
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                number: [0],
+                block: [{
+                  type: "block",
+                  procedure: vars2.map(makeProcedureWithIndex(testValues2)),
+                  statement: [{
+                    type: "call",
+                    number: [value]
+                  }]
+                }]
+              }].concat(vars1.map(makeProcedureWithIndex(testValues1))),
+              statement: [{
+                type: "statement-block"
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+
+      Object.keys(testValues1).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues1[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  procedure: vars2.map(makeProcedure),
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }].concat(vars1.map(makeProcedure)),
+              statement: [{
+                type: "call",
+                ident: [varName]
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                number: [0],
+                block: [{
+                  type: "block",
+                  procedure: vars2.map(makeProcedureWithIndex(testValues2)),
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }].concat(vars1.map(makeProcedureWithIndex(testValues1))),
+              statement: [{
+                type: "call",
+                number: [value]
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+
+    });
+  };
+
+
 
   testConst([["a", 4]]);
   testConst([["a", 5]]);
@@ -550,6 +685,9 @@ describe("Semantic", function() {
 
   testVarsTwoLevels(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2});
   testVarsTwoLevelsLasgn(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2});
+
+
+  testProcedureTwoLevels(["a"], ["a", "b"], {a: 3}, {a: 1, b: 2});
 
 });
 

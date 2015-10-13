@@ -312,7 +312,7 @@ window.PL0Infinite = (function() {
 
   var SemanticAnalyzer = function(options) {
     this.output = options.output;
-    this.context = {currentFrame: {}, nextOffset: 0};
+    this.context = {currentFrame: {}, nextOffset: 0, nextProcedureNumber: 0};
   };
 
   var childProcessor = function(ch, context) {
@@ -353,6 +353,10 @@ window.PL0Infinite = (function() {
           ch.child(varname, type, function(ch) {
             cb(wrapProcedureNode(ch, context));
           });
+        } else if (type === "call") { 
+          ch.child(varname, type, function(ch) {
+            cb(wrapCallNode(ch, context));
+          });
         } else {
           ch.child(varname, type, function(ch) {
             cb(wrapNode(ch, context));
@@ -375,12 +379,29 @@ window.PL0Infinite = (function() {
     };
   };
 
+  var wrapCallNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
+      attr: function(varname, value) {
+        if (varname === "ident") {
+          var symbol = context.currentFrame[value];
+          ch.attr("number", symbol.number);
+          return;
+        }
+        ch.attr(varname, value);
+      }
+    };
+  };  
+
   var wrapProcedureNode = function(ch, context) {
     return {
       child: childProcessor(ch, context),
       attr: function(varname, value) {
         if (varname === "name") {
-          ch.attr("number", 0);
+          var currentNumber = context.nextProcedureNumber;
+          context.currentFrame[value] = {number: currentNumber};
+          context.nextProcedureNumber++;
+          ch.attr("number", currentNumber);
           return;
         }
         ch.attr(varname, value);
