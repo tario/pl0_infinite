@@ -399,6 +399,7 @@ window.PL0Infinite = (function() {
       attr: function(varname, value) {
         if (varname === "name") {
           var currentNumber = context.nextProcedureNumber;
+          if (context.currentFrame.hasOwnProperty(value)) throw "Duplicated declaration: procedure " + value;
           context.currentFrame[value] = {number: currentNumber};
           context.nextProcedureNumber++;
           ch.attr("number", currentNumber);
@@ -414,11 +415,13 @@ window.PL0Infinite = (function() {
       child: childProcessor(ch, context),
       attr: function(varname, value) {
         if (varname === "_var") {
+          if (context.currentFrame.hasOwnProperty(value)) throw "Duplicated declaration: variable " + value;
           context.currentFrame[value] = {type: "_var", offset: context.nextOffset};
           context.nextOffset++;
           return;
         }
         if (varname === "_const") {
+          if (context.currentFrame.hasOwnProperty(value[0])) throw "Duplicated declaration: const " + value;
           context.currentFrame[value[0]] = {type: "_const", value: value[1]};
           return;
         }

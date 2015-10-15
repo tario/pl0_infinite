@@ -19,25 +19,42 @@ describe("Semantic", function() {
     }
   };
 
+  var z = 0;
   var testAnalyzer = function(inputTree, outputTree) {
+    z++;
     describe("when input tree is " + JSON.stringify(inputTree), function() {
       beforeEach(function() {
         this.builder = new PL0Infinite.ASTBuilder();
         this.analyzer = new PL0Infinite.SemanticAnalyzer({output: this.builder});
+      });
 
-        replay(inputTree, this.analyzer);
-      })
+      if (outputTree) {
+        it("should be valid", function() {
+          chai.expect(function() {
+            replay(inputTree, this.analyzer);
+          }.bind(this)).to.not.throw();
+        });
 
-      it("should result on tree " + JSON.stringify(outputTree), function() {
-        var result = this.builder.result;
-        try {
-          chai.expect(result).to.deep.equal(outputTree);
-        } catch (e) {
-          console.log(JSON.stringify(result, null, 4));
-          console.log(JSON.stringify(outputTree, null, 4));
-          throw e;
+        if (typeof outputTree === "object") {
+          it("should result on tree " + JSON.stringify(outputTree), function() {
+            replay(inputTree, this.analyzer);
+            var result = this.builder.result;
+            try {
+              chai.expect(result).to.deep.equal(outputTree);
+            } catch (e) {
+              console.log(JSON.stringify(result, null, 4));
+              console.log(JSON.stringify(outputTree, null, 4));
+              throw e;
+            }
+          })
         }
-      })
+      } else {
+        it("should NOT be valid", function() {
+          chai.expect(function() {
+            replay(inputTree, this.analyzer);
+          }.bind(this)).to.throw();
+        });
+      }
     })
   };
 
@@ -682,9 +699,65 @@ describe("Semantic", function() {
   testVarsTwoLevels(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2});
   testVarsTwoLevelsLasgn(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2});
 
-
   testProcedureTwoLevels(["a"], ["a", "b"], {a: 0}, {a: 2, b: 3});
   testProcedureTwoLevels(["a", "b"], ["a"], {a: 0, b: 1}, {a: 3, b: 1});
+
+  var buildTestTree = function(options) {
+    var makeProcedure = function(varName) {
+      return {
+        type: "procedure",
+        name: [varName],
+        block: [{
+          type: "block",
+          statement: [options.statement || {
+            type: "statement-block"
+          }]
+        }]
+      };
+    };
+
+    return {
+      type: "program",
+      block: [{
+        type: "block",
+        _var: options.vars||[],
+        _const: options.consts||[],
+        procedure: (options.procedures||[]).map(makeProcedure),
+        statement: [options.statement || {
+          type: "statement-block"
+        }]
+      }]
+    };
+  };
+
+  testAnalyzer(buildTestTree({}), true);
+
+  testAnalyzer(buildTestTree({vars: ["a", "b", "c"]}), true); // esto esta bien, esta permitido
+
+  testAnalyzer(buildTestTree({vars: ["axx", "axx"]}), false); // declaracion duplicada
+  testAnalyzer(buildTestTree({consts: [["a", 1], ["a", 1]]}), false); // declaracion duplicada
+  testAnalyzer(buildTestTree({procedures: ["azz", "azz"]}), false); // declaracion duplicada
+  testAnalyzer(buildTestTree({vars: ["a"], consts: [["a", 1]]}), false); // declaracion duplicada
+  testAnalyzer(buildTestTree({vars: ["a"], procedures: ["a"]}), false); // declaracion duplicada
+  testAnalyzer(buildTestTree({consts: [["a", 1]], procedures: ["a"]}), false); // declaracion duplicada
+
+  testAnalyzer(buildTestTree({statement: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: ["0"]}] }] }]
+    }}), false); // identificador no declarado (a)
+
+
+  testAnalyzer(buildTestTree({vars: ["a"], statement: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+    }}), false); // identificador no declarado (b)
+
+  testAnalyzer(buildTestTree({statement: {
+        type: "call",
+        ident: ["z"]
+    }}), false); // identificador no declarado (z)
 
 });
 
