@@ -17,10 +17,12 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
       var parser = new PL0Infinite.DefaultParser({});
       var scanner = new PL0Infinite.DefaultScanner({});
       var builder = new PL0Infinite.ASTBuilder();
+      var semantic = new PL0Infinite.SemanticAnalyzer({output: builder})
+      // parser -> semantic -> builder
 
       var scan = scanner.scan($scope.code || "");
       try {
-        parser.parse(scan, {output: builder});
+        parser.parse(scan, {output: semantic});
         $timeout(function() { clearErrorLines(); $scope.error = null });
       } catch (e) {
         if (e.expected) {
@@ -31,6 +33,10 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
           clearErrorLines({except: e.found.line});
           doc.addLineClass(e.found.line-1, "background", "errorline");
           $timeout(function() { $scope.error = "Expected " + strexpected + " found " + e.found.type });
+        } else if (e.fromOutput) {
+          clearErrorLines({except: e.lastToken.line});
+          doc.addLineClass(e.lastToken.line-1, "background", "errorline");          
+          $timeout(function() { $scope.error = e.fromOutput });
         } else {
           $timeout(function() { $scope.error = e.toString() });
         }

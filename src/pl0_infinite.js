@@ -118,16 +118,47 @@ window.PL0Infinite = (function() {
 
   };
 
-  DefaultParser.prototype.parse = function(scanner, options) {
+  DefaultParser.prototype.parse = function(_scanner, options) {
     options = options || {};
     var token;
     var currentNode = options.output;
+
+    var lastToken;
+    var scanner = {
+      nextToken: function() {
+        lastToken = _scanner.nextToken();
+        return lastToken;
+      }
+    };
+
+    var wrap = function(node) {
+      return {
+        child: function(attrName, nodeType, cb) {
+          try {
+            return node.child(attrName, nodeType, cb);
+          } catch(e) {
+            if (e.fromOutput) throw e;
+            // error from output
+            throw {fromOutput: e, lastToken: lastToken};
+          }
+        },
+        attr: function(attrName, value) {
+          try {
+            return node.attr(attrName, value);
+          } catch (e) {
+            if (e.fromOutput) throw e;
+            // error from output
+            throw {fromOutput: e, lastToken: lastToken};
+          }
+        }
+      }
+    };
 
     var child = function(attrName, nodeType, fcn) {
 
       var oldNode = currentNode;
       currentNode.child(attrName, nodeType, function(newNode) {
-        currentNode = newNode;
+        currentNode = wrap(newNode);
         fcn(newNode);
         currentNode = oldNode;
       });
@@ -323,6 +354,7 @@ window.PL0Infinite = (function() {
           cb({
             attr: function(varname_, value) {
               var symbol = context.currentFrame[value];
+              if (!symbol) throw "Undeclared indentifier " + value;
               if (symbol.type === '_var') {
                 ch.child(varname, "offset", function(chch) {
                   chch.attr("offset", symbol.offset);
@@ -373,6 +405,7 @@ window.PL0Infinite = (function() {
       attr: function(varname, value) {
         if (varname === "ident") {
           var symbol = context.currentFrame[value];
+          if (!symbol) throw "Undeclared indentifier " + value;
           if (symbol.type != "_var") throw "Bad l-value: " + symbol.type;
           ch.attr("offset", symbol.offset);
           return;
@@ -388,6 +421,7 @@ window.PL0Infinite = (function() {
       attr: function(varname, value) {
         if (varname === "ident") {
           var symbol = context.currentFrame[value];
+          if (!symbol) throw "Undeclared indentifier " + value;
           if (symbol.type != "proc") throw "Cannot call symbol of type " + symbol.type;
 
           ch.attr("number", symbol.number);
