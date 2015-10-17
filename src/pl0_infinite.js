@@ -327,10 +327,12 @@ window.PL0Infinite = (function() {
                 ch.child(varname, "offset", function(chch) {
                   chch.attr("offset", symbol.offset);
                 });
-              } else {
+              } else if (symbol.type === '_const') {
                 ch.child(varname, "number", function(chch) {
                   chch.attr("value", symbol.value);
                 });
+              } else {
+                throw "Cannot read symbol of type " + symbol.type;
               }
             }
           });
@@ -371,6 +373,7 @@ window.PL0Infinite = (function() {
       attr: function(varname, value) {
         if (varname === "ident") {
           var symbol = context.currentFrame[value];
+          if (symbol.type != "_var") throw "Bad l-value: " + symbol.type;
           ch.attr("offset", symbol.offset);
           return;
         }
@@ -385,6 +388,8 @@ window.PL0Infinite = (function() {
       attr: function(varname, value) {
         if (varname === "ident") {
           var symbol = context.currentFrame[value];
+          if (symbol.type != "proc") throw "Cannot call symbol of type " + symbol.type;
+
           ch.attr("number", symbol.number);
           return;
         }
@@ -400,7 +405,7 @@ window.PL0Infinite = (function() {
         if (varname === "name") {
           var currentNumber = context.nextProcedureNumber;
           if (context.currentFrame.hasOwnProperty(value)) throw "Duplicated declaration: procedure " + value;
-          context.currentFrame[value] = {number: currentNumber};
+          context.currentFrame[value] = {type: "proc", number: currentNumber};
           context.nextProcedureNumber++;
           ch.attr("number", currentNumber);
           return;

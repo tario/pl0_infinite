@@ -747,7 +747,6 @@ describe("Semantic", function() {
         expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: ["0"]}] }] }]
     }}), false); // identificador no declarado (a)
 
-
   testAnalyzer(buildTestTree({vars: ["a"], statement: {
         type: "lasgn",
         ident: ["a"],
@@ -759,5 +758,37 @@ describe("Semantic", function() {
         ident: ["z"]
     }}), false); // identificador no declarado (z)
 
+
+  // procedures
+  testAnalyzer(buildTestTree({procedures: ["a"], statement: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: ["0"]}] }] }]
+    }}), false); // identificador de tipo incorrecto (a)
+
+
+  testAnalyzer(buildTestTree({procedures: ["b"], vars: ["a"], statement: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
+    }}), false); // identificador de tipo incorrecto (b)
+
+  // variables
+  testAnalyzer(buildTestTree({vars: ["z"], statement: {
+        type: "call",
+        ident: ["z"]
+    }}), false); // identificador no declarado (z)
+
+  // constantes
+  testAnalyzer(buildTestTree({consts: [["a", 1]], statement: {
+        type: "lasgn",
+        ident: ["a"],
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: ["0"]}] }] }]
+    }}), false); // identificador de tipo incorrecto (a)
+
+  testAnalyzer(buildTestTree({consts: [["a", 1]], statement: {
+        type: "call",
+        ident: ["a"]
+    }}), false); // identificador no declarado (z)  
 });
 
