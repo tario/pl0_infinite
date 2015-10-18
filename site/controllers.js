@@ -23,7 +23,11 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", fun
       var scan = scanner.scan($scope.code || "");
       try {
         parser.parse(scan, {output: semantic});
-        $timeout(function() { clearErrorLines(); $scope.error = null });
+        $timeout(function() {
+          clearErrorLines();
+          $scope.runner = PL0Infinite.transpile(builder.result);
+          $scope.error = null;
+        });
       } catch (e) {
         if (e.expected) {
           var strexpected;

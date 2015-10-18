@@ -21,6 +21,10 @@
   white-space: pre;
 }
 
+.code {
+  white-space: pre-wrap;
+}
+
 .errorline {
   background-color: #fcc;
 }
@@ -34,7 +38,13 @@
         <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal', onLoad: codemirrorLoaded}" ng-model="code">
         </textarea>
         <h3>Results</h3>
+        <p>
         <b ng-if="error"class="code-error">{{error}}</b>
+        </p>
+        <button ng-show="runner && runner.run" ng-click="runner.run()">Run</button>
+        <p class="code" ng-if="runner && runner.code">
+          {{runner.code}}
+        </p>
     </div>
 </div>
 

@@ -137,7 +137,7 @@ window.PL0Infinite = (function() {
           try {
             return node.child(attrName, nodeType, cb);
           } catch(e) {
-            if (e.fromOutput) throw e;
+            if (e.fromOutput || e.expected) throw e;
             // error from output
             throw {fromOutput: e, lastToken: lastToken};
           }
@@ -146,7 +146,7 @@ window.PL0Infinite = (function() {
           try {
             return node.attr(attrName, value);
           } catch (e) {
-            if (e.fromOutput) throw e;
+            if (e.fromOutput || e.expected) throw e;
             // error from output
             throw {fromOutput: e, lastToken: lastToken};
           }
@@ -515,6 +515,129 @@ window.PL0Infinite = (function() {
   };
 
   pl0.ASTBuilder = ASTBuilder;
+
+  pl0.transpile = function(ast) {
+    var body = "";
+    var prologue = "";
+
+    var variables = 0;
+
+    var compareOperators = {
+      "=": "===",
+      "<": "<",
+      ">": ">",
+      "<=": "<=",
+      "=<": "<=",
+      ">=": ">=",
+      "=>": ">="
+    };
+
+    var translateFcn = {
+      "lasgn": function(tree) {
+        if (tree.offset[0] + 1 > variables) variables = tree.offset [0] + 1;
+        return "_v" + tree.offset[0] + " = " + translate(tree.expression[0]) + " ;"
+      },
+      "expression": function(tree) {
+        var code = "( ";
+        tree.term.forEach(function(term) {
+          if (term.negative && term.negative[0]) {
+            code = code + " - ";
+          } else {
+            code = code + " + ";
+          }
+          code = code + translate(term);
+        });
+
+        code = code + " )";
+
+        return code;
+      },
+      "product": function(tree) {
+        var factor = tree.factor[0];
+        var code = "";
+        if (factor.negative && factor.negative[0]) {
+          code = code + " 1 / ";
+        }
+        code = code + translate(factor);
+
+        tree.factor.slice(1).forEach(function(factor) {
+          if (factor.negative && factor.negative[0]) {
+            code = code + " / ";
+          } else {
+            code = code + " * ";
+          }
+          code = code + translate(factor);
+        });
+
+        return code;
+      },
+      "number": function(tree) {
+        return tree.value[0].toString();
+      },
+      "offset": function(tree) {
+        return "_v" + tree.offset[0];
+      },
+      "block": function(tree) {
+        if (tree.statement) {
+          return (tree.procedure||[]).map(translate).join(";\n")+translate(tree.statement[0]);
+        } else {
+          return "";
+        }
+      },
+      "statement-block": function(tree) {
+        return ";\n" + tree.statement.map(translate).join(";\n") + ";\n";
+      },
+      "procedure": function(tree) {
+        return "var _p" + tree.number[0] + " = function() {" + translate(tree.block[0]) + "};\n";
+      },
+      "compare": function(tree) {
+        return translate(tree.expression[0]) + compareOperators[tree.operator[0]] + translate(tree.expression[1]);
+      },
+      "odd": function(tree) {
+        return translate(tree.expression[0]) + " % 2 === 0"
+      },
+      "if": function(tree) {
+        return "if("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";
+      },
+      "while": function(tree) {
+        return "while("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";
+      },
+      "call": function(tree) {
+        return "_p"+tree.number[0]+"()";
+      }
+    };
+
+    var translate = function(tree) {
+      var f = translateFcn[tree.type];
+      if (f) {
+        return f(tree);
+      } else {
+        debugger;
+      }
+    };
+
+    var translateProgram = function(tree) {
+      return translate(tree.block[0]);
+    };
+
+    body = translateProgram(ast);
+
+    if (variables > 0) {
+      var vars = [];
+      for (var i=0; i<variables; i++) {
+        vars.push("_v"+i + " = 0");
+      }
+      prologue = "var " + vars.join(",") + ";\n";
+    }
+    var code = prologue + body;
+
+    return {
+      code: code,
+      run: function() {
+        eval(code);
+      }
+    }
+  };
 
   return pl0;
 })();
