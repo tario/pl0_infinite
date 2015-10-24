@@ -28,6 +28,7 @@
 .errorline {
   background-color: #fcc;
 }
+
 </style>
 </head>
 <body>
@@ -41,10 +42,9 @@
         <p>
         <b ng-if="error"class="code-error">{{error}}</b>
         </p>
-        <button ng-show="runner && runner.run" ng-click="runner.run()">Run</button>
-        <p class="code" ng-if="runner && runner.code">
-          {{runner.code}}
-        </p>
+        <button ng-show="runner && runner.run" ng-click="run()">Run</button>
+        <h3>Output</h3>
+        <p class="code" ng-if="runner && runner.code">{{log}}</p>
     </div>
 </div>
 

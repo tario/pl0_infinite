@@ -1,6 +1,30 @@
 var app = angular.module("PL0InfiniteUI");
 app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", function($scope, $timeout, fn, PL0Infinite) {
 
+  $scope.log = "";
+
+  $scope.run = function() {
+    var stdout = {
+      write: function(data) {
+        $scope.log = $scope.log + data.toString();
+        $scope.$digest();
+      }
+    };
+
+    var stdin = {
+      read: function() {
+        return prompt("Please enter a value");
+      }
+    };
+
+    $timeout(function() {
+      $scope.log = "";
+      $timeout(function() {
+        $scope.runner.run(stdout, stdin);
+      });
+    });
+  };
+
   $scope.codemirrorLoaded = function(_editor) {
     var doc = _editor.getDoc();
 

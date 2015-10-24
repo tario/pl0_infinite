@@ -637,6 +637,15 @@ window.PL0Infinite = (function() {
       "if": function(tree) {
         return "if("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";
       },
+      "write": function(tree) {
+        return ";_write("+ (tree.expression ? translate(tree.expression[0]) : JSON.stringify(tree.string))+");";
+      },
+      "writeln": function(tree) {
+        return ";_write(("+ (tree.expression ? translate(tree.expression[0]) : JSON.stringify(tree.string))+")+'\\n');";
+      },
+      "readln": function(tree) {
+        return "_v" + tree.offset[0] + " = _readln();"
+      },
       "while": function(tree) {
         return "while("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";
       },
@@ -671,7 +680,15 @@ window.PL0Infinite = (function() {
 
     return {
       code: code,
-      run: function() {
+      run: function(stdout, stdin) {
+        var self = this;
+        var _write = function(value) {
+          stdout.write(value);
+        };
+        var _readln = function() {
+          return stdin.read();
+        };
+
         eval(code);
       }
     }
