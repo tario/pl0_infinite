@@ -65,7 +65,7 @@ window.PL0Infinite = (function() {
   }
 
   var separators = [".", "=", ",", ";", "=", "<", ">", "+", "-", "*", "/", "(", ")"];
-  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
+  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD", "WRITELN", "READLN", "WRITE"];
   DefaultScanner.prototype.scan = function(text) {
 
     var currentIndex = 0;
@@ -286,8 +286,26 @@ window.PL0Infinite = (function() {
           readToken("WHILE"); readCondition(); readToken("DO");
             readStatement();
         });
+      } else if (token.type === "READLN") {
+        child("statement", "readln", function() {
+          readToken("READLN");
+          currentNode.attr("ident", readToken("IDENT").value); 
+        });
+      } else if (token.type === "WRITELN" || token.type === "WRITE") {
+        child("statement", token.type.toLowerCase(), function() {
+          readToken(token.type);
+          if (token.type === "STRING") {
+            var currToken = token;
+            readToken("STRING")
+            currentNode.attr("string", currToken.value); 
+          } else {
+            child("expression", "expression", function() {
+              readExpression();
+            });
+          }
+        });
       }
-   };
+    };
 
     var token;
     token = scanner.nextToken();
@@ -387,6 +405,10 @@ window.PL0Infinite = (function() {
           ch.child(varname, type, function(ch) {
             cb(wrapProcedureNode(ch, context));
           });
+        } else if (type === "readln") { 
+          ch.child(varname, type, function(ch){
+            cb(wrapReadLnNode(ch, context));
+          });
         } else if (type === "call") { 
           ch.child(varname, type, function(ch) {
             cb(wrapCallNode(ch, context));
@@ -396,6 +418,22 @@ window.PL0Infinite = (function() {
             cb(wrapNode(ch, context));
           });
         }
+    };
+  };
+
+  var wrapReadLnNode = function(ch, context) {
+    return {
+      child: childProcessor(ch, context),
+      attr: function(varname, value) {
+        if (varname === "ident") {
+          var symbol = context.currentFrame[value];
+          if (!symbol) throw "Undeclared indentifier " + value;
+          if (symbol.type != "_var") throw "Bad l-value: " + symbol.type;
+          ch.attr("offset", symbol.offset);
+          return;
+        }
+        ch.attr(varname, value);
+      }
     };
   };
 

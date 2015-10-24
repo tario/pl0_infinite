@@ -758,6 +758,21 @@ describe("Semantic", function() {
         ident: ["z"]
     }}), false); // identificador no declarado (z)
 
+  testAnalyzer(buildTestTree({statement: {
+        type: "readln",
+        ident: ["z"]
+    }}), false); // identificador no declarado (z)
+
+  testAnalyzer(buildTestTree({statement: {
+        type: "write",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["z"]}] }] }]
+    }}), false); // identificador no declarado (z)
+
+  testAnalyzer(buildTestTree({statement: {
+        type: "writeln",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["z"]}] }] }]
+    }}), false); // identificador no declarado (z)
+
 
   // procedures
   testAnalyzer(buildTestTree({procedures: ["a"], statement: {
@@ -766,18 +781,33 @@ describe("Semantic", function() {
         expression: [{type: "expression", term: [{type: "product", factor: [{type:"number", value: ["0"]}] }] }]
     }}), false); // identificador de tipo incorrecto (a)
 
-
   testAnalyzer(buildTestTree({procedures: ["b"], vars: ["a"], statement: {
         type: "lasgn",
         ident: ["a"],
         expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
     }}), false); // identificador de tipo incorrecto (b)
 
+  testAnalyzer(buildTestTree({procedures: ["a"], statement: {
+        type: "writeln",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }}), false); // identificador de tipo incorrecto (a)
+
+  testAnalyzer(buildTestTree({procedures: ["a"], statement: {
+        type: "write",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }}), false); // identificador de tipo incorrecto (a)
+
+  testAnalyzer(buildTestTree({procedures: ["a"], statement: {
+        type: "readln",
+        ident: ["a"]
+    }}), false); // identificador de tipo incorrecto (a)
+
+
   // variables
   testAnalyzer(buildTestTree({vars: ["z"], statement: {
         type: "call",
         ident: ["z"]
-    }}), false); // identificador no declarado (z)
+    }}), false); // identificador de tipo incorrecto (z)
 
   // constantes
   testAnalyzer(buildTestTree({consts: [["a", 1]], statement: {
@@ -789,6 +819,132 @@ describe("Semantic", function() {
   testAnalyzer(buildTestTree({consts: [["a", 1]], statement: {
         type: "call",
         ident: ["a"]
-    }}), false); // identificador no declarado (z)  
+    }}), false); // identificador de tipo incorrecto (a) 
+
+  testAnalyzer(buildTestTree({consts: [["a", 1]], statement: {
+        type: "readln",
+        ident: ["a"]
+    }}), false); // identificador de tipo incorrecto (a)
+
+
+  testAnalyzer(buildTestTree({vars: ["a"], statement: {
+        type: "writeln",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }}), true);
+
+  testAnalyzer(buildTestTree({vars: ["a"], statement: {
+        type: "write",
+        expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }}), true);
+
+
+
+  var testVarsTwoLevelsWrite = function(vars1, vars2, testValues1, testValues2, fname) {
+    describe("when vars " + vars1.join(",") + " and " + vars2.join(","), function() {
+      Object.keys(testValues2).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues2[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  statement: [{
+                    type: fname,
+                    expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [varName]}] }] }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                number: [0],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: fname,
+                    expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                  }]
+                }]
+              }],
+              statement: [{
+                type: "statement-block"
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+
+      Object.keys(testValues1).forEach(function(testValue) {
+        var varName = testValue;
+        var value = testValues1[testValue];
+
+        testVariant(function(version) {
+          var replaceVar = _replace({
+              type: "block",
+              _var: vars1,
+              procedure: [{
+                type: "procedure",
+                name: ["x"],
+                block: [{
+                  type: "block",
+                  _var: vars2,
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: fname,
+                expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: [varName]}] }] }]
+              }]
+            }, { 
+              type: "block",
+              procedure: [{
+                type: "procedure",
+                number: [0],
+                block: [{
+                  type: "block",
+                  statement: [{
+                    type: "statement-block"
+                  }]
+                }]
+              }],
+              statement: [{
+                type: fname,
+                expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+              }]
+            });
+          
+          return {
+            type: "program", 
+            block: [replaceVar(version)]
+          };
+        });
+      });
+ 
+
+
+    });
+  };
+
+  testVarsTwoLevelsWrite(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2}, "write");
+  testVarsTwoLevelsWrite(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2}, "writeln");
+
+
 });
 

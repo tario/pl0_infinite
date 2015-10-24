@@ -128,6 +128,26 @@ describe("Parser", function() {
           ident: ["a"],
           expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
         }]
+    }},
+    {tokens: ["WRITELN", "STRING/helloworld"], tree: {
+      type: "writeln",
+      string: ["helloworld"]
+    }},
+    {tokens: ["WRITELN", "IDENT/a"], tree: {
+      type: "writeln",
+      expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }},
+    {tokens: ["WRITE", "STRING/helloworld"], tree: {
+      type: "write",
+      string: ["helloworld"]
+    }},
+    {tokens: ["WRITE", "IDENT/a"], tree: {
+      type: "write",
+      expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
+    }},
+    {tokens: ["READLN", "IDENT/a"], tree: {
+      type: "readln",
+      ident: ["a"]
     }}
   ];
 

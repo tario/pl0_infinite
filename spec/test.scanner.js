@@ -61,7 +61,7 @@ describe("Scanner", function() {
   };
 
   describe("keywords", function() {
-    var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD"];
+    var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD", "WRITELN", "READLN", "WRITE"];
     keywords.forEach(function(keyword) {
       testScan(keyword, [keyword, 'EOF']);
 
