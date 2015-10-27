@@ -593,13 +593,13 @@ window.PL0Infinite = (function() {
       "product": function(tree) {
         var factor = tree.factor[0];
         var code = "";
-        if (factor.negative && factor.negative[0]) {
+        if (factor.divide && factor.divide[0]) {
           code = code + " 1 / ";
         }
         code = code + translate(factor);
 
         tree.factor.slice(1).forEach(function(factor) {
-          if (factor.negative && factor.negative[0]) {
+          if (factor.divide && factor.divide[0]) {
             code = code + " / ";
           } else {
             code = code + " * ";
