@@ -129,19 +129,19 @@ describe("Parser", function() {
           expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["b"]}] }] }]
         }]
     }},
-    {tokens: ["WRITELN", "STRING/helloworld"], tree: {
+    {tokens: ["WRITELN", "(", "STRING/helloworld", ")"], tree: {
       type: "writeln",
-      string: ["helloworld"]
+      expression: [{type: "string", value: ["helloworld"]}]
     }},
-    {tokens: ["WRITELN", "IDENT/a"], tree: {
+    {tokens: ["WRITELN", "(", "IDENT/a", ")"], tree: {
       type: "writeln",
       expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
     }},
-    {tokens: ["WRITE", "STRING/helloworld"], tree: {
+    {tokens: ["WRITE", "(", "STRING/helloworld", ")"], tree: {
       type: "write",
-      string: ["helloworld"]
+      expression: [{type: "string", value: ["helloworld"]}]
     }},
-    {tokens: ["WRITE", "IDENT/a"], tree: {
+    {tokens: ["WRITE", "(", "IDENT/a", ")"], tree: {
       type: "write",
       expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
     }},

@@ -294,15 +294,25 @@ window.PL0Infinite = (function() {
       } else if (token.type === "WRITELN" || token.type === "WRITE") {
         child("statement", token.type.toLowerCase(), function() {
           readToken(token.type);
-          if (token.type === "STRING") {
-            var currToken = token;
-            readToken("STRING")
-            currentNode.attr("string", currToken.value); 
-          } else {
-            child("expression", "expression", function() {
-              readExpression();
-            });
-          }
+
+          var readExpressionOrString = function() {
+            if (token.type === "STRING") {
+              var currToken = token;
+              readToken("STRING");
+              child("expression", "string", function() {
+                currentNode.attr("value", currToken.value);
+              });
+            } else {
+              child("expression", "expression", function() {
+                readExpression();
+              });
+            }
+          };
+
+          readToken("(");
+            repeat(readExpressionOrString, ",");
+          readToken(")");
+
         });
       }
     };
