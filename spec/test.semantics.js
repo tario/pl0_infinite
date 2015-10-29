@@ -946,5 +946,33 @@ describe("Semantic", function() {
   testVarsTwoLevelsWrite(["a"], ["a", "b"], {a: 0}, {a: 1, b: 2}, "writeln");
 
 
+  describe("write multiple arguments replacement", function() {
+    testVariant(function(version) {
+      var replaceVar = _replace({
+          type: "block",
+          statement: [{
+            type: "write",
+            expression: [
+              {type: "string", value: ["hello"]},
+              {type: "string", value: ["world"]}
+            ]
+          }]
+        }, { 
+          type: "block",
+          statement: [{
+            type: "statement-block",
+            statement: [
+              {type: "write", string: ["hello"]},
+              {type: "write", string: ["world"]}
+            ]
+          }]
+        });
+      
+      return {
+        type: "program", 
+        block: [replaceVar(version)]
+      };
+    });
+  });
 });
 
