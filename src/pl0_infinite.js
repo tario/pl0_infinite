@@ -418,6 +418,11 @@ window.PL0Infinite = (function() {
         } else if (type === "write" || type === "writeln") { 
           ch.child(varname, "statement-block", function(ch){
             cb(wrapWriteNode(ch, context, type));
+            if (type === "writeln") {
+              ch.child("statement", "writeln", function(ch_) {
+                ch_.attr("string", "");
+              });
+            }
           });
         } else if (type === "readln") { 
           ch.child(varname, type, function(ch){
@@ -463,11 +468,11 @@ window.PL0Infinite = (function() {
 
         if (varname === "expression") {
           if (type === "string") {
-            ch.child("statement", _type, function(ch_) {
+            ch.child("statement", "write", function(ch_) {
               cb(wrapStringExpression(ch_, context));
             });
           } else if (type === "expression") {
-            ch.child("statement", _type, function(ch_) {
+            ch.child("statement", "write", function(ch_) {
               ch_.child("expression", "expression", function(ch__) {
                 cb(wrapNode(ch__, context));
               });

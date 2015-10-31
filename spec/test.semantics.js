@@ -840,6 +840,12 @@ describe("Semantic", function() {
 
 
   var testVarsTwoLevelsWrite = function(vars1, vars2, testValues1, testValues2, fname) {
+    var writelnAppend = fname === "writeln" ? function(x){
+      return x.concat([{type: "writeln", string: [""]}]);
+    } : function(x) {
+      return x;
+    };
+
     describe("when vars " + vars1.join(",") + " and " + vars2.join(","), function() {
       Object.keys(testValues2).forEach(function(testValue) {
         var varName = testValue;
@@ -873,10 +879,10 @@ describe("Semantic", function() {
                   type: "block",
                   statement: [{
                     type: "statement-block",
-                    statement: [{
-                      type: fname,
+                    statement: writelnAppend([{
+                      type: "write",
                       expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
-                    }]
+                    }])
                   }]
                 }]
               }],
@@ -929,10 +935,10 @@ describe("Semantic", function() {
               }],
               statement: [{
                 type: "statement-block",
-                statement: [{
-                  type: fname,
+                statement: writelnAppend([{
+                  type: "write",
                   expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
-                }]
+                }])
               }]
             });
           
@@ -981,6 +987,36 @@ describe("Semantic", function() {
     });
   });
 
+
+  describe("writeln multiple arguments replacement", function() {
+    testVariant(function(version) {
+      var replaceVar = _replace({
+          type: "block",
+          statement: [{
+            type: "writeln",
+            expression: [
+              {type: "string", value: ["hello"]},
+              {type: "string", value: ["world"]}
+            ]
+          }]
+        }, { 
+          type: "block",
+          statement: [{
+            type: "statement-block",
+            statement: [
+              {type: "write", string: ["hello"]},
+              {type: "write", string: ["world"]},
+              {type: "writeln", string: [""]}
+            ]
+          }]
+        });
+      
+      return {
+        type: "program", 
+        block: [replaceVar(version)]
+      };
+    });
+  });
  
 });
 
