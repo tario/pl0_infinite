@@ -872,8 +872,11 @@ describe("Semantic", function() {
                 block: [{
                   type: "block",
                   statement: [{
-                    type: fname,
-                    expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                    type: "statement-block",
+                    statement: [{
+                      type: fname,
+                      expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                    }]
                   }]
                 }]
               }],
@@ -925,8 +928,11 @@ describe("Semantic", function() {
                 }]
               }],
               statement: [{
-                type: fname,
-                expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                type: "statement-block",
+                statement: [{
+                  type: fname,
+                  expression: [{type: "expression", term: [{type: "product", factor: [{type:"offset", offset: [value]}] }] }]
+                }]
               }]
             });
           
@@ -974,5 +980,7 @@ describe("Semantic", function() {
       };
     });
   });
+
+ 
 });
 

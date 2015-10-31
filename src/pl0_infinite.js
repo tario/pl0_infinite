@@ -435,7 +435,7 @@ window.PL0Infinite = (function() {
     };
   };
 
-  var wrapWriteNode = function(ch, context, type) {
+  var wrapWriteNode = function(ch, context, _type) {
     return {
       child: function(varname, type, cb) {
         var wrapStringExpression = function(ch, context) {
@@ -450,13 +450,28 @@ window.PL0Infinite = (function() {
           };
         };
 
+        var wrapExpressionExpression = function(ch, context) {
+          return {
+            child: function(varname, type, cb) {
+              ch.child(varname, type, cb);
+            },
+            attr: function(varname, value) {
+
+            }
+          };
+        };
+
         if (varname === "expression") {
           if (type === "string") {
-            ch.child("statement", "write", function(ch_) {
+            ch.child("statement", _type, function(ch_) {
               cb(wrapStringExpression(ch_, context));
             });
           } else if (type === "expression") {
-
+            ch.child("statement", _type, function(ch_) {
+              ch_.child("expression", "expression", function(ch__) {
+                cb(wrapNode(ch__, context));
+              });
+            });
           }
         }
       },
