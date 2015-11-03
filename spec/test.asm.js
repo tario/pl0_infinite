@@ -22,20 +22,20 @@ describe("Asm", function() {
     });
   };
 
-  var testPushByte = function(value) {
+  var testbyte = function(value) {
     testAsm("single byte " + value, function(asm) {
-      asm.pushByte(value);
+      asm.byte(value);
     }, [value]);
   };
 
   var testMultipleByte = function(values) {
     testAsm("multiple bytes " + values, function(asm) {
-      values.forEach(asm.pushByte.bind(asm));
+      values.forEach(asm.byte.bind(asm));
     }, values);
   };
 
   for (var i=0; i<255; i++) {
-    testPushByte(i);
+    testbyte(i);
   }
 
   for (var i=0; i<255; i+=51) {
@@ -46,7 +46,7 @@ describe("Asm", function() {
 
   var testDword = function(value, expected) {
     testAsm("when dword number 0x" + value.toString(16), function(asm) {
-      asm.pushDword(value);
+      asm.dword(value);
     }, expected);
   }; 
 
@@ -60,16 +60,16 @@ describe("Asm", function() {
   testDword(-1, [0xFF, 0xFF, 0xFF, 0xFF]);
 
   testAsm("when byte 0x76, dword 0x44909037 and byte 0x43", function(asm) {
-    asm.pushByte(0x76);
-    asm.pushDword(0x44909037);
-    asm.pushByte(0x43);
+    asm.byte(0x76);
+    asm.dword(0x44909037);
+    asm.byte(0x43);
   }, [0x76, 0x37, 0x90, 0x90, 0x44, 0x43]);
 
   var testRepeatedByte = function(value, count) {
     var array = [];
     for (var j=0; j<count; j++) array.push(value);
     testAsm("when byte " + value + " is repeated " + count + " times", function(asm) {
-      for (var j=0; j<count; j++) asm.pushByte(value);
+      for (var j=0; j<count; j++) asm.byte(value);
     }, array);
   };
 

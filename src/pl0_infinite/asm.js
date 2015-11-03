@@ -17,7 +17,7 @@ window.Asm = (function() {
     this.nextPosition = 0;
   };
 
-  asm.prototype.pushByte = function(value) {
+  asm.prototype.byte = function(value) {
     this.result[this.nextPosition] = value;
     this.nextPosition++;
 
@@ -28,11 +28,11 @@ window.Asm = (function() {
     }    
   };
 
-  asm.prototype.pushDword = function(value) {
-    this.pushByte(value & 0xFF);
-    this.pushByte((value>>8) & 0xFF);
-    this.pushByte((value>>16) & 0xFF);
-    this.pushByte((value>>24) & 0xFF);
+  asm.prototype.dword = function(value) {
+    this.byte(value & 0xFF);
+    this.byte((value>>8) & 0xFF);
+    this.byte((value>>16) & 0xFF);
+    this.byte((value>>24) & 0xFF);
   };
 
   asm.process = function(f) {
