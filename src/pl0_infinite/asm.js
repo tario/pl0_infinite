@@ -44,10 +44,17 @@ window.Asm = (function() {
   };
 
   asm.prototype.jmp = function(s) {
-    this.byte(0xeb);
 
-    var rel = s.position - this.nextPosition - 1;
-    this.byte(rel);
+    var rel = s.position - this.nextPosition;
+
+    if (rel < -127 ||rel > 127) {
+      this.byte(0xe9);
+      this.dword(rel-5);
+
+    } else {
+      this.byte(0xeb);
+      this.byte(rel-2);
+    }
   };
 
   asm.process = function(f) {

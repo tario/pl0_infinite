@@ -1,5 +1,8 @@
 describe("Asm", function() {
-  var testAsm = function(text, f, expected) {
+  var testAsm = function(text, f, expected, options) {
+    options = options ||{};
+    options.start = options.start || 0;
+
     describe(text, function() {
       beforeEach(function() {
         this.result = Asm.process(f);
@@ -7,18 +10,20 @@ describe("Asm", function() {
 
       describe("length", function() {
         it ("should be " + expected.length, function() {
-          chai.expect(this.result.length).to.be.equal(expected.length);
+          chai.expect(this.result.length).to.be.equal(expected.length + options.start);
         });
       });
 
-      if (expected.length < 256)
+
+      if (expected.length - options.start < 256)
         expected.forEach(function(value, index) {
           describe("index " + index, function() {
             it("should be equal " + value, function() {
-              chai.expect(this.result[index]).to.be.equal(value);
+              chai.expect(this.result[index+options.start]).to.be.equal(value);
             });
           });
         });
+
     });
   };
 
@@ -83,13 +88,13 @@ describe("Asm", function() {
   testRepeatedByte(0x90, 16384);
 
 
-  var testJmp = function(str, f, expected) {
+  var testJmp = function(str, f, expected, options) {
     testAsm(str, function(asm) {
       var s1 = asm.symbol();
       asm.tag(s1);
       f(asm);
       asm.jmp(s1);
-    }, expected)
+    }, expected, options)
 
 
   };
@@ -103,8 +108,13 @@ describe("Asm", function() {
     asm.byte(0x90);
   }, [0x90, 0xeb, 0xfd]);
 
-  testJmp("when s1: 0x90 and jmp", function(asm) {
+  testJmp("when s1: jmp", function(asm) {
   }, [0xeb, 0xfe]);
+
+  testJmp("when s1: 0x90... x 512 ...  and jmp", function(asm) {
+    for (var i=0; i<512; i++) asm.byte(0x90);
+  }, [0xe9, 0xfb, 0xfd, 0xff, 0xff], {start: 512});
+
 
 });
 
