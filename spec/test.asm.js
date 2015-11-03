@@ -82,5 +82,29 @@ describe("Asm", function() {
   testRepeatedByte(0x90, 4000);
   testRepeatedByte(0x90, 16384);
 
+
+  var testJmp = function(str, f, expected) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.tag(s1);
+      f(asm);
+      asm.jmp(s1);
+    }, expected)
+
+
+  };
+
+  testJmp("when s1: 0x90, 0x90 and jmp", function(asm) {
+    asm.byte(0x90);
+    asm.byte(0x90);
+  }, [0x90, 0x90, 0xeb, 0xfc]);
+
+  testJmp("when s1: 0x90 and jmp", function(asm) {
+    asm.byte(0x90);
+  }, [0x90, 0xeb, 0xfd]);
+
+  testJmp("when s1: 0x90 and jmp", function(asm) {
+  }, [0xeb, 0xfe]);
+
 });
 

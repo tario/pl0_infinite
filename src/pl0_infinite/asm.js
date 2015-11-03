@@ -35,6 +35,21 @@ window.Asm = (function() {
     this.byte((value>>24) & 0xFF);
   };
 
+  asm.prototype.symbol = function() {
+    return {};
+  };
+
+  asm.prototype.tag = function(s) {
+    s.position = this.nextPosition;
+  };
+
+  asm.prototype.jmp = function(s) {
+    this.byte(0xeb);
+
+    var rel = s.position - this.nextPosition - 1;
+    this.byte(rel);
+  };
+
   asm.process = function(f) {
     var a = new Asm();
     f(a);
