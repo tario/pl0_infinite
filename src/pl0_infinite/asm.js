@@ -1,4 +1,17 @@
 window.Asm = (function() {
+
+  if (!Uint8Array.prototype.slice) {
+    Uint8Array.prototype.slice = function(offset, length) {
+      var u = new Uint8Array(length);
+
+      for (var i=offset; i<=offset+length; i++) {
+        u[i] = this[i];
+      }
+
+      return u;
+    };
+  }
+
   var asm = function() {
     this.result = new Uint8Array(512);
     this.nextPosition = 0;
