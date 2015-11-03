@@ -11,14 +11,14 @@ describe("Asm", function() {
         });
       });
 
-
-      expected.forEach(function(value, index) {
-        describe("index " + index, function() {
-          it("should be equal " + value, function() {
-            chai.expect(this.result[index]).to.be.equal(value);
+      if (expected.length < 256)
+        expected.forEach(function(value, index) {
+          describe("index " + index, function() {
+            it("should be equal " + value, function() {
+              chai.expect(this.result[index]).to.be.equal(value);
+            });
           });
         });
-      });
     });
   };
 
@@ -63,6 +63,24 @@ describe("Asm", function() {
     asm.pushDword(0x44909037);
     asm.pushByte(0x43);
   }, [0x76, 0x37, 0x90, 0x90, 0x44, 0x43]);
+
+  var testRepeatedByte = function(value, count) {
+    var array = [];
+    for (var j=0; j<count; j++) array.push(value);
+    testAsm("when byte " + value + " is repeated " + count + " times", function(asm) {
+      for (var j=0; j<count; j++) asm.pushByte(value);
+    }, array);
+  };
+
+  for (var i=1; i<=256; i+=64) {
+    testRepeatedByte(0x90, i);
+  };
+
+
+  testRepeatedByte(0x90, 1000);
+  testRepeatedByte(0x90, 4000);
+  testRepeatedByte(0x90, 16384);
+
 
 });
 
