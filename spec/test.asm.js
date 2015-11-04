@@ -88,32 +88,51 @@ describe("Asm", function() {
   testRepeatedByte(0x90, 16384);
 
 
-  var testJmp = function(str, f, expected, options) {
+  var testBackJmp = function(str, f, expected, options) {
     testAsm(str, function(asm) {
       var s1 = asm.symbol();
       asm.tag(s1);
       f(asm);
       asm.jmp(s1);
-    }, expected, options)
-
-
+    }, expected, options);
   };
 
-  testJmp("when s1: 0x90, 0x90 and jmp", function(asm) {
+  var testFrontJmp = function(str, f, expected) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.jmp(s1);
+      f(asm);
+      asm.tag(s1);
+    }, expected);
+  };
+
+  testBackJmp("when s1: 0x90, 0x90 and jmp", function(asm) {
     asm.byte(0x90);
     asm.byte(0x90);
   }, [0x90, 0x90, 0xeb, 0xfc]);
 
-  testJmp("when s1: 0x90 and jmp", function(asm) {
+  testBackJmp("when s1: 0x90 and jmp", function(asm) {
     asm.byte(0x90);
   }, [0x90, 0xeb, 0xfd]);
 
-  testJmp("when s1: jmp", function(asm) {
+  testBackJmp("when s1: jmp", function(asm) {
   }, [0xeb, 0xfe]);
 
-  testJmp("when s1: 0x90... x 512 ...  and jmp", function(asm) {
+  testBackJmp("when s1: 0x90... x 512 ...  and jmp", function(asm) {
     for (var i=0; i<512; i++) asm.byte(0x90);
   }, [0xe9, 0xfb, 0xfd, 0xff, 0xff], {start: 512});
+
+  testFrontJmp("when jmp s1; s1:", function(asm) {
+  }, [0xe9, 0x00, 0x00, 0x00, 0x00]);
+
+  testFrontJmp("when jmp s1; nop; s1:", function(asm) {
+    asm.byte(0x90);
+  }, [0xe9, 0x01, 0x00, 0x00, 0x00, 0x90]);
+
+  testFrontJmp("when jmp s1; nop; nop; s1:", function(asm) {
+    asm.byte(0x90);
+    asm.byte(0x90);
+  }, [0xe9, 0x02, 0x00, 0x00, 0x00, 0x90, 0x90]);
 
 
 });

@@ -36,24 +36,49 @@ window.Asm = (function() {
   };
 
   asm.prototype.symbol = function() {
-    return {};
+    var f = [];
+    return {onSet: f.push.bind(f), set: function() {
+      f.forEach(function(f) {
+        f();
+      });
+    }};
   };
 
   asm.prototype.tag = function(s) {
     s.position = this.nextPosition;
+    s.set();
+  };
+
+  asm.prototype.seek = function(position, f) {
+    var oldPosition = this.nextPosition;
+    this.nextPosition = position;
+    f(this);
+    this.nextPosition = oldPosition;
   };
 
   asm.prototype.jmp = function(s) {
-
-    var rel = s.position - this.nextPosition;
-
-    if (rel < -127 ||rel > 127) {
+    if (typeof s.position === "undefined") {
+      var currentPosition;
+      var self = this;
       this.byte(0xe9);
-      this.dword(rel-5);
-
+      currentPosition = this.nextPosition;
+      s.onSet(function() {
+        self.seek(currentPosition, function(asm) {
+          var rel = s.position - self.nextPosition;
+          asm.dword(rel-4);
+        });
+      });
+      this.dword(0x0);
     } else {
-      this.byte(0xeb);
-      this.byte(rel-2);
+      var rel = s.position - this.nextPosition;
+      if (rel < -127 ||rel > 127) {
+        this.byte(0xe9);
+        this.dword(rel-5);
+
+      } else {
+        this.byte(0xeb);
+        this.byte(rel-2);
+      }
     }
   };
 
