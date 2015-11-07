@@ -77,7 +77,7 @@ window.Asm = (function() {
       this.dword(0x0);
     } else {
       var rel = s.position - this.nextPosition;
-      if (rel < -127 ||rel > 127) {
+      if ((!short_code) || rel < -127 ||rel > 127) {
         if (Array.isArray(long_code)) {
           for (var i=0; i<long_code.length; i++) this.byte(long_code[i]);
           this.dword(rel-4-long_code.length);
@@ -94,11 +94,15 @@ window.Asm = (function() {
 
   asm.prototype.jmp = function(s) {
     this._jmp(s, 0xeb, 0xe9);
-  }
+  };
 
   asm.prototype.je = function(s) {
     this._jmp(s, 0x74, [0x0f, 0x84]);
-  }
+  };
+
+  asm.prototype.call = function(s) {
+    this._jmp(s, null, 0xe8);
+  };
 
   asm.process = function(f) {
     var a = new Asm();

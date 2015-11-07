@@ -170,6 +170,7 @@ describe("Asm", function() {
 
   testStandardJmp("jmp", 0xeb, 0xe9);
   testStandardJmp("je", 0x74, [0x0f, 0x84]);
+  testStandardJmp("call", null, 0xe8);
 
   var testBackJe = function(str, f, expected, options) {
     testAsm(str, function(asm) {
@@ -202,6 +203,30 @@ describe("Asm", function() {
 
   testBackJe("when s1: je", function(asm) {
   }, [0x74, 0xfe]);
+
+  var testBackCall = function(str, f, expected, options) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.tag(s1);
+      f(asm);
+      asm.call(s1);
+    }, expected, options);
+  };
+
+  var testFrontCall = function(str, f, expected) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.call(s1);
+      f(asm);
+      asm.tag(s1);
+    }, expected);
+  };
+
+  testFrontCall("when call s1; s1:", function() {
+  }, [0xe8, 0x00, 0x00, 0x00, 0x00]);
+
+  testBackCall("when s1: call s1", function() {
+  }, [0xe8, 0xfb, 0xff, 0xff, 0xff]);
 
 });
 
