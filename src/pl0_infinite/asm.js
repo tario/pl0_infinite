@@ -77,7 +77,7 @@ window.Asm = (function() {
       this.dword(0x0);
     } else {
       var rel = s.position - this.nextPosition;
-      if ((!short_code) || rel < -127 ||rel > 127) {
+      if ((!short_code) || rel < -126 ||rel > 127) {
         if (Array.isArray(long_code)) {
           for (var i=0; i<long_code.length; i++) this.byte(long_code[i]);
           this.dword(rel-4-long_code.length);

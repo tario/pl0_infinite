@@ -122,6 +122,14 @@ describe("Asm", function() {
     for (var i=0; i<512; i++) asm.byte(0x90);
   }, [0xe9, 0xfb, 0xfd, 0xff, 0xff], {start: 512});
 
+  testBackJmp("when s1: 0x90... x 126 ...  and jmp", function(asm) {
+    for (var i=0; i<126; i++) asm.byte(0x90);
+  }, [0xeb, 0x80], {start: 126});
+
+  testBackJmp("when s1: 0x90... x 127 ...  and jmp", function(asm) {
+    for (var i=0; i<127; i++) asm.byte(0x90);
+  }, [0xe9, 0x7c, 0xff, 0xff, 0xff], {start: 127});
+
   testFrontJmp("when jmp s1; s1:", function(asm) {
   }, [0xe9, 0x00, 0x00, 0x00, 0x00]);
 
