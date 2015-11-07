@@ -56,11 +56,17 @@ window.Asm = (function() {
     this.nextPosition = oldPosition;
   };
 
-  asm.prototype.jmp = function(s) {
+  asm.prototype._jmp = function(s, short_code, long_code) {
     if (typeof s.position === "undefined") {
       var currentPosition;
       var self = this;
-      this.byte(0xe9);
+
+      if (Array.isArray(long_code)) {
+        for (var i=0; i<long_code.length; i++) this.byte(long_code[i]);
+      } else {
+        this.byte(long_code);
+      }
+
       currentPosition = this.nextPosition;
       s.onSet(function() {
         self.seek(currentPosition, function(asm) {
@@ -72,15 +78,27 @@ window.Asm = (function() {
     } else {
       var rel = s.position - this.nextPosition;
       if (rel < -127 ||rel > 127) {
-        this.byte(0xe9);
-        this.dword(rel-5);
-
-      } else {
-        this.byte(0xeb);
+        if (Array.isArray(long_code)) {
+          for (var i=0; i<long_code.length; i++) this.byte(long_code[i]);
+          this.dword(rel-4-long_code.length);
+        } else {
+          this.byte(long_code);
+          this.dword(rel-5);
+        }
+    } else {
+        this.byte(short_code);
         this.byte(rel-2);
       }
     }
   };
+
+  asm.prototype.jmp = function(s) {
+    this._jmp(s, 0xeb, 0xe9);
+  }
+
+  asm.prototype.je = function(s) {
+    this._jmp(s, 0x74, [0x0f, 0x84]);
+  }
 
   asm.process = function(f) {
     var a = new Asm();

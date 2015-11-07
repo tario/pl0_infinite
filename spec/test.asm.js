@@ -135,5 +135,74 @@ describe("Asm", function() {
   }, [0xe9, 0x02, 0x00, 0x00, 0x00, 0x90, 0x90]);
 
 
+  var testStandardJmp = function(name, short_code, long_code) {
+    describe("when using " + name, function() {
+      var s1;
+      beforeEach(function() {
+        this.spy = sinon.spy();
+        this.asm = new Asm();
+        this.asm._jmp = this.spy;
+
+        s1 = this.asm.symbol();
+        this.asm[name].bind(this.asm)(s1);
+      });
+
+      it ("should call _jmp one time", function() {
+        chai.expect(this.spy.called).to.be.equal(true);
+      });
+
+      describe("first argument", function() {
+        it ("should be " + JSON.stringify(s1), function() {
+          chai.expect(this.spy.args[0][0]).to.be.equal(s1);
+        });
+      });
+
+
+      [short_code, long_code].forEach(function(value, index) {
+        describe("argument on index " + index, function() {
+          it ("should be " + JSON.stringify(value), function() {
+            chai.expect(this.spy.args[0][index+1]).to.deep.equal(value);
+          });
+        });
+      });
+    });
+  };
+
+  testStandardJmp("jmp", 0xeb, 0xe9);
+  testStandardJmp("je", 0x74, [0x0f, 0x84]);
+
+  var testBackJe = function(str, f, expected, options) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.tag(s1);
+      f(asm);
+      asm.je(s1);
+    }, expected, options);
+  };
+
+  var testFrontJe = function(str, f, expected) {
+    testAsm(str, function(asm) {
+      var s1 = asm.symbol();
+      asm.je(s1);
+      f(asm);
+      asm.tag(s1);
+    }, expected);
+  };
+
+  testFrontJe("when je s1; s1:", function() {
+  }, [0x0f, 0x84, 0x00, 0x00, 0x00, 0x00]);
+
+  testFrontJe("when je s1; nop; s1", function(asm) {
+      asm.byte(0x90);
+  }, [0x0f, 0x84, 0x01, 0x00, 0x00, 0x00, 0x90]);
+
+  testBackJe("when s1: 0x90... x 512 ...  and je", function(asm) {
+    for (var i=0; i<512; i++) asm.byte(0x90);
+  }, [0x0f, 0x84, 0xfa, 0xfd, 0xff, 0xff], {start: 512});  
+
+  testBackJe("when s1: je", function(asm) {
+  }, [0x74, 0xfe]);
+
 });
+
 
