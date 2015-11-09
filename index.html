@@ -9,6 +9,8 @@
 <script src="lib/codemirror/mode/pascal.js"></script>
 <script src="lib/angular/ui-codemirror.js"></script>
 <script src="src/pl0_infinite.js?version=f2012d27"></script>
+<script src="src/pl0_infinite/asm.js?version=f2012d27"></script>
+<script src="src/pl0_infinite/compiler.js?version=f2012d27"></script>
 
 <script src="site/app.js?version=f2012d27"></script>
 <script src="site/controllers.js?version=f2012d27"></script>
@@ -44,7 +46,8 @@
         </p>
         <button ng-show="runner && runner.run" ng-click="run()">Run</button>
         <h3>Output</h3>
-        <p class="code" ng-if="runner && runner.code">{{log}}</p>
+        <a ng-show="runner" ng-click="download_win32()">Download EXE (Win32)</a>
+        <p class="code" ng-if="runner && runner.code"">{{log}}</p>
     </div>
 </div>
 
