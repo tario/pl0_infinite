@@ -1,5 +1,5 @@
 var app = angular.module("PL0InfiniteUI");
-app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q", "win32_encoded_header", function($scope, $timeout, fn, PL0Infinite, $q, win32_encoded_header) {
+app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q", "win32_encoded_header", "win32_symbols", function($scope, $timeout, fn, PL0Infinite, $q, win32_encoded_header, win32_symbols) {
 
   $scope.log = "";
 
@@ -32,7 +32,8 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
         array[i] = str.charCodeAt(i);
     }
     return new window.PL0Compiler({
-      header: array
+      header: array,
+      symbols: win32_symbols
     });
   }();
 
