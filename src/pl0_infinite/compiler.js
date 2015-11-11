@@ -7,18 +7,50 @@ window.PL0Compiler = (function() {
 
   compiler.prototype.compile = function(ast) {
     var self = this;
+    var r = Asm.regs;
+
     var result = Asm.process(function(asm) {
       var readln = asm.symbol();
       var write = asm.symbol();
       var writeenter = asm.symbol();
       var exit = asm.symbol();
 
+      asm.base = self.symbols.base;
+
       readln.position = self.symbols.symbols.readln - self.symbols.base;
       write.position = self.symbols.symbols.write - self.symbols.base;
       writeenter.position = self.symbols.symbols.writeenter - self.symbols.base;
       exit.position = self.symbols.symbols.exit - self.symbols.base;
 
-      asm.jmp(exit);
+      var _compile = {
+        program: function(node) {
+          var variable_section = asm.symbol();
+
+          asm.mov(r.edi, variable_section);
+          compile(node.block[0]);
+          asm.jmp(exit);
+
+          asm.tag(variable_section);
+        },
+
+        block: function(node) {
+          if (node.statement) {
+            compile(node.statement[0]);
+          }
+        },
+
+        readln: function(node) {
+          asm.call(readln);
+          asm.mov([r.edi, node.offset[0]],r.eax);
+        }
+
+      };
+
+      var compile = function(node) {
+        _compile[node.type](node);
+      };
+
+      compile(ast);
     });
 
     var sectionSize = this.symbols.baseSectionSize + result.length + 0x100 - (result.length & 0xFF) ;

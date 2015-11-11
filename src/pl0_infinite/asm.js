@@ -17,6 +17,21 @@ window.Asm = (function() {
     this.nextPosition = 0;
   };
 
+  var reg = function(name, number) {
+    return {type: "reg", name: name, number: number};
+  };
+
+  asm.regs = {
+    eax: reg("eax", 0),
+    ecx: reg("ecx", 1),
+    edx: reg("edx", 2),
+    ebx: reg("ebx", 3),
+    esp: reg("esp", 4),
+    ebp: reg("ebp", 5),
+    esi: reg("esi", 6),
+    edi: reg("edi", 7)
+  };
+
   asm.prototype.byte = function(value) {
     this.result[this.nextPosition] = value;
     this.nextPosition++;
@@ -37,7 +52,7 @@ window.Asm = (function() {
 
   asm.prototype.symbol = function() {
     var f = [];
-    return {onSet: f.push.bind(f), set: function() {
+    return {type: "symbol", onSet: f.push.bind(f), set: function() {
       f.forEach(function(f) {
         f();
       });
@@ -102,6 +117,36 @@ window.Asm = (function() {
 
   asm.prototype.call = function(s) {
     this._jmp(s, null, 0xe8);
+  };
+
+  asm.prototype.mov = function(destination, origin) {
+    if (destination.type === "reg") {
+      if (origin.type === "reg") {
+        this.byte(0x89);
+        this.byte(0xc0 + destination.number + (origin.number << 3));
+      } else if (isFinite(origin)) {
+        this.byte(0xb8 + destination.number);
+        this.dword(origin);
+      } else if (origin.type === "symbol") {
+        var self = this;
+        this.byte(0xb8 + destination.number);
+        currentPosition = this.nextPosition;
+        origin.onSet(function() {
+          self.seek(currentPosition, function(asm) {
+            asm.dword(origin.position + self.base);
+          });
+        });
+        this.dword(0x0);
+      } else if (Array.isArray(origin)) {
+        this.byte(0x8b);
+        this.byte(0x80 + origin[0].number + (destination.number << 3));
+        this.dword(origin[1]);
+      }
+    } else if (Array.isArray(destination)) {
+      this.byte(0x89);
+      this.byte(0x80 + destination[0].number + (origin.number << 3));
+      this.dword(destination[1]);
+    }
   };
 
   asm.process = function(f) {
