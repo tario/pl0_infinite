@@ -119,6 +119,38 @@ window.Asm = (function() {
     this._jmp(s, null, 0xe8);
   };
 
+  asm.prototype.push = function(r) {
+    this.byte(0x50 + r.number);
+  };
+
+  asm.prototype.pop = function(r) {
+    this.byte(0x58 + r.number);
+  };
+
+  asm.prototype.inc = function(r) {
+    this.byte(0x40 + r.number);
+  };
+
+  asm.prototype.ret = function() {
+    this.byte(0xC3);
+  };
+
+  asm.prototype.xor = function(r1, r2) {
+    this.byte(0x31);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
+  asm.prototype.imul = function(r1, r2) {
+    this.byte(0x0f);
+    this.byte(0xaf);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
+  asm.prototype.add = function(r1, r2) {
+    this.byte(0x01);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
   asm.prototype.mov = function(destination, origin) {
     if (destination.type === "reg") {
       if (origin.type === "reg") {

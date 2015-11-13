@@ -15,6 +15,17 @@ window.PL0Compiler = (function() {
       var writeenter = asm.symbol();
       var exit = asm.symbol();
 
+      var mov = asm.mov.bind(asm);
+      var xor = asm.xor.bind(asm);
+      var push = asm.push.bind(asm);
+      var pop = asm.pop.bind(asm);
+      var add = asm.add.bind(asm);
+      var imul = asm.imul.bind(asm);
+      var inc = asm.inc.bind(asm);
+      var eax = r.eax;
+      var ebx = r.ebx;
+      var edi = r.edi;
+
       asm.base = self.symbols.base;
 
       readln.position = self.symbols.symbols.readln - self.symbols.base;
@@ -22,7 +33,92 @@ window.PL0Compiler = (function() {
       writeenter.position = self.symbols.symbols.writeenter - self.symbols.base;
       exit.position = self.symbols.symbols.exit - self.symbols.base;
 
+      var _needEbxSave = {
+        number: function() {
+          return false;
+        },
+
+        offset: function() {
+          return false;
+        },
+
+        product: function(node) {
+          if (node.factor.length > 1) return true;
+          return needEbxSave(node.factor[0]);
+        },
+
+        expression: function(node) {
+          if (node.term.length > 1) return true;
+          return needEbxSave(node.term[0]);
+        }
+      };
+
+      var needEbxSave = function(node) {
+        if (!_needEbxSave[node.type]) return true;
+        return _needEbxSave[node.type](node);
+      };
+
       var _compile = {
+        "statement-block": function(node) {
+          node.statement.forEach(function(subnode) {
+            compile(subnode);
+          });
+        },
+
+        offset: function(node) {
+          mov(eax, [edi, node.offset]);
+        },
+
+        number: function(node) {
+          mov(eax, node.value);
+        },
+
+        product: function(node) {
+          if (node.factor.length === 0) {
+          } else if (node.factor.length === 1) {
+            compile(node.factor[0]);
+          } else {
+            compile(node.factor[0]);
+            mov(ebx, eax);
+            node.factor.slice(1).forEach(function(f) {
+              var _save = needEbxSave(f);
+              if (_save) push(ebx);
+              compile(f);
+              if (_save) pop(ebx);
+              imul(eax, ebx);
+            });
+            mov(eax, ebx);
+          }
+
+        },
+
+        expression: function(node) {
+          if (node.term.length === 0) {
+          } else if (node.term.length === 1) {
+            compile(node.term[0]);
+          } else {
+            compile(node.term[0]);
+            mov(ebx, eax);
+            node.term.slice(1).forEach(function(t) {
+              var _save = needEbxSave(t);
+              if (_save) push(ebx);
+              compile(t);
+              if (_save) pop(ebx);
+              add(ebx, eax);
+            });
+            mov(eax, ebx);
+          }
+        },
+
+        writeln: function() {
+          asm.call(writeenter);
+        },
+               
+        write: function(node) {
+          compile(node.expression[0]);
+          asm.call(write);
+        },
+
         program: function(node) {
           var variable_section = asm.symbol();
 
@@ -47,6 +143,7 @@ window.PL0Compiler = (function() {
       };
 
       var compile = function(node) {
+        if (!_compile[node.type]) throw "Unimplemented node: " + node.type;
         _compile[node.type](node);
       };
 
