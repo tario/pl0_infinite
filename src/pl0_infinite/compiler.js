@@ -22,6 +22,9 @@ window.PL0Compiler = (function() {
       var add = asm.add.bind(asm);
       var imul = asm.imul.bind(asm);
       var inc = asm.inc.bind(asm);
+      var jmp = asm.jmp.bind(asm);
+      var tag = asm.tag.bind(asm);
+      var call = asm.call.bind(asm);
       var eax = r.eax;
       var ebx = r.ebx;
       var edi = r.edi;
@@ -122,11 +125,11 @@ window.PL0Compiler = (function() {
         program: function(node) {
           var variable_section = asm.symbol();
 
-          asm.mov(r.edi, variable_section);
+          mov(edi, variable_section);
           compile(node.block[0]);
-          asm.jmp(exit);
+          jmp(exit);
 
-          asm.tag(variable_section);
+          tag(variable_section);
         },
 
         block: function(node) {
@@ -136,8 +139,8 @@ window.PL0Compiler = (function() {
         },
 
         readln: function(node) {
-          asm.call(readln);
-          asm.mov([r.edi, node.offset[0]],r.eax);
+          call(readln);
+          mov([r.edi, node.offset[0]],eax);
         }
 
       };
