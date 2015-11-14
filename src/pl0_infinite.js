@@ -386,24 +386,43 @@ window.PL0Infinite = (function() {
     return function(varname, type, cb) {
 
         if (type === "ident") {
+          var symbol;
+          var extraAttr = {};
 
           cb({
             attr: function(varname_, value) {
-              var symbol = context.currentFrame[value];
-              if (!symbol) throw "Undeclared indentifier " + value;
-              if (symbol.type === '_var') {
-                ch.child(varname, "offset", function(chch) {
-                  chch.attr("offset", symbol.offset);
-                });
-              } else if (symbol.type === '_const') {
-                ch.child(varname, "number", function(chch) {
-                  chch.attr("value", symbol.value);
-                });
+              if (varname_ === "value") {
+                symbol = context.currentFrame[value];
+                if (!symbol) throw "Undeclared indentifier " + value;
               } else {
-                throw "Cannot read symbol of type " + symbol.type;
+                extraAttr[varname_] = extraAttr[varname_] || [];
+                extraAttr[varname_].push(value);
               }
             }
           });
+
+          if (symbol.type === '_var') {
+            ch.child(varname, "offset", function(chch) {
+              chch.attr("offset", symbol.offset);
+              for (var k in extraAttr) {
+                for (var v in extraAttr[k]) {
+                  chch.attr(k, v)
+                }
+              }
+            });
+          } else if (symbol.type === '_const') {
+            ch.child(varname, "number", function(chch) {
+              chch.attr("value", symbol.value);
+              for (var k in extraAttr) {
+                for (var v in extraAttr[k]) {
+                  chch.attr(k, v)
+                }
+              }
+            });
+          } else {
+            throw "Cannot read symbol of type " + symbol.type;
+          }
+
           return;
         }
       
