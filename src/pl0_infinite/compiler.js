@@ -21,6 +21,7 @@ window.PL0Compiler = (function() {
       var push = asm.push.bind(asm);
       var pop = asm.pop.bind(asm);
       var add = asm.add.bind(asm);
+      var sub = asm.sub.bind(asm);
       var imul = asm.imul.bind(asm);
       var inc = asm.inc.bind(asm);
       var jmp = asm.jmp.bind(asm);
