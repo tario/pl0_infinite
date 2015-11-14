@@ -311,9 +311,15 @@ window.PL0Infinite = (function() {
             }
           };
 
-          readToken("(");
-            repeat(readExpressionOrString, ",");
-          readToken(")");
+          if (token.type === "(") {
+            readToken("(");
+              repeat(readExpressionOrString, ",");
+            readToken(")");
+          } else {
+            child("expression", "string", function() {
+              currentNode.attr("value", "");
+            });
+          }
 
         });
       }
