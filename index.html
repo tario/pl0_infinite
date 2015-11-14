@@ -12,9 +12,6 @@
 <script src="src/pl0_infinite/asm.js?version=4f132e"></script>
 <script src="src/pl0_infinite/compiler.js?version=4f132e"></script>
 
-<script src="site/app.js?version=4f132e"></script>
-<script src="site/controllers.js?version=4f132e"></script>
-
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <link rel="stylesheet" href="css/codemirror.css">
 <style>
@@ -47,8 +44,11 @@
         <button ng-show="runner && runner.run" ng-click="run()">Run</button>
         <h3>Output</h3>
         <a ng-show="runner" ng-click="download_win32()">Download EXE (Win32)</a>
-        <p class="code" ng-if="runner && runner.code"">{{log}}</p>
+        <p class="code" ng-if="runner && runner.code">{{log}}</p>
     </div>
 </div>
+
+<script src="site/app.js?version=4f132e"></script>
+<script src="site/controllers.js?version=4f132e"></script>
 
 </body>
