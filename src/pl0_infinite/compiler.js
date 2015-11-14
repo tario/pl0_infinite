@@ -206,7 +206,12 @@ window.PL0Compiler = (function() {
 
           jmp(repeat);
           tag(out);
-        }
+        },
+
+        lasgn: function(node) {
+          compile(node.expression[0]);
+          mov([edi, node.offset[0]], eax);
+        },
 
       };
 
