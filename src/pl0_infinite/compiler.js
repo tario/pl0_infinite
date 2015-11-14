@@ -72,6 +72,8 @@ window.PL0Compiler = (function() {
         return _needEbxSave[node.type](node);
       };
 
+      var _procedure = {};
+
       var _compile = {
         "statement-block": function(node) {
           node.statement.forEach(function(subnode) {
@@ -143,8 +145,30 @@ window.PL0Compiler = (function() {
           tag(variable_section);
         },
 
-        block: function(node) {
+        call: function(node) { // el call de PL/0
+          asm.call(_procedure[node.number[0]]); // este es el call del assembler
+        },
+
+        procedure: function(node) {
+          var newProcedureSymbol = asm.symbol();
+          _procedure[node.number[0]] = newProcedureSymbol;
+          compile(node.block[0], newProcedureSymbol);
+
+          asm.ret();
+        },
+
+        block: function(node, codeStartSymbol) {
+          if (node.procedure && node.procedure.length > 0) {
+            var avoidProcedure = asm.symbol();
+            jmp(avoidProcedure);
+              node.procedure.forEach(function(p){
+                compile(p);
+              });
+            tag(avoidProcedure);
+          }
+
           if (node.statement) {
+            if (codeStartSymbol) tag(codeStartSymbol);
             compile(node.statement[0]);
           }
         },
@@ -211,13 +235,13 @@ window.PL0Compiler = (function() {
         lasgn: function(node) {
           compile(node.expression[0]);
           mov([edi, node.offset[0]], eax);
-        },
+        }
 
       };
 
-      var compile = function(node) {
+      var compile = function(node, extrarg) {
         if (!_compile[node.type]) throw "Unimplemented node: " + node.type;
-        return _compile[node.type](node);
+        return _compile[node.type](node, extrarg);
       };
 
       compile(ast);
