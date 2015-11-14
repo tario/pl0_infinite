@@ -182,7 +182,7 @@ window.Asm = (function() {
       } else if (origin.type === "symbol") {
         var self = this;
         this.byte(0xb8 + destination.number);
-        currentPosition = this.nextPosition;
+        var currentPosition = this.nextPosition;
         origin.onSet(function() {
           self.seek(currentPosition, function(asm) {
             asm.dword(origin.position + self.base);

@@ -12,6 +12,7 @@ window.PL0Compiler = (function() {
     var result = Asm.process(function(asm) {
       var readln = asm.symbol();
       var write = asm.symbol();
+      var writestring = asm.symbol();
       var writeenter = asm.symbol();
       var exit = asm.symbol();
 
@@ -44,6 +45,7 @@ window.PL0Compiler = (function() {
 
       readln.position = self.symbols.symbols.readln - self.symbols.base;
       write.position = self.symbols.symbols.write - self.symbols.base;
+      writestring.position = self.symbols.symbols.writestring - self.symbols.base;
       writeenter.position = self.symbols.symbols.writeenter - self.symbols.base;
       exit.position = self.symbols.symbols.exit - self.symbols.base;
 
@@ -75,6 +77,7 @@ window.PL0Compiler = (function() {
       };
 
       var _procedure = {};
+      var stringconstants = [];
 
       var _compile = {
         "statement-block": function(node) {
@@ -134,8 +137,15 @@ window.PL0Compiler = (function() {
         },
                
         write: function(node) {
-          compile(node.expression[0]);
-          asm.call(write);
+          if (node.string) {
+            var newstrconst = {symbol: asm.symbol(), value: node.string[0]};
+            stringconstants.push(newstrconst);
+            mov(eax, newstrconst.symbol);
+            asm.call(writestring);
+          } else {
+            compile(node.expression[0]);
+            asm.call(write);
+          }
         },
 
         program: function(node) {
@@ -256,6 +266,14 @@ window.PL0Compiler = (function() {
       for(var i=0;i<globalsize;i++) {
         asm.dword(0);
       }
+
+      stringconstants.forEach(function(strconst) {
+        asm.tag(strconst.symbol);
+        for (var i=0; i<strconst.value.length; i++) {
+          asm.byte(strconst.value.charCodeAt(i));
+        }
+        asm.byte(0);
+      });
     });
 
     var sectionSize = this.symbols.baseSectionSize + result.length + 0x100 - (result.length & 0xFF) ;

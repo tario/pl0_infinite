@@ -15,6 +15,7 @@ app.constant("win32_symbols", {
       readln: 0x00401390,
       write: 0x00401220,
       writeenter: 0x00401210,
+      writestring: 0x004011e0,
       exit: 0x00401388
     }
 });
