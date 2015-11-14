@@ -24,7 +24,18 @@ window.PL0Compiler = (function() {
       var inc = asm.inc.bind(asm);
       var jmp = asm.jmp.bind(asm);
       var tag = asm.tag.bind(asm);
+      var and = asm.and.bind(asm);
       var call = asm.call.bind(asm);
+
+      var je = asm.je.bind(asm);
+      var jne = asm.jne.bind(asm);
+      var jl = asm.jl.bind(asm);
+      var jge = asm.jge.bind(asm);
+      var jle = asm.jle.bind(asm);
+      var jg = asm.jg.bind(asm);
+      var jpe = asm.jpe.bind(asm);
+
+      var cmp = asm.cmp.bind(asm);
       var eax = r.eax;
       var ebx = r.ebx;
       var edi = r.edi;
@@ -138,16 +149,54 @@ window.PL0Compiler = (function() {
           }
         },
 
+        odd: function(node) {
+          compile(node.expression[0]);
+          xor(ebx, ebx);
+          inc(ebx);
+          and(eax, ebx);
+          cmp(eax, ebx);
+          return jne;
+        },
+
+        compare: function(node) {
+          compile(node.expression[0]);
+          mov(ebx, eax);
+          var _save = needEbxSave(node.expression[1]);
+          if (_save) push(ebx);
+          compile(node.expression[1]);
+          if (_save) pop(ebx);
+          cmp(ebx, eax);
+
+          return {
+            '>': jle,
+            '<': jge,
+            '=': jne,
+            '<>': je,
+            '<=': jg,
+            '=<': jg,
+            '>=': jl,
+            '=>': jl
+          }[node.operator[0]];
+        },
+
         readln: function(node) {
           call(readln);
-          mov([r.edi, node.offset[0]],eax);
+          mov([edi, node.offset[0]],eax);
+        },
+
+        "if": function(node) {
+          var _conditional_jmp = compile(node.condition[0]); // devuelve el jmp que deberias hacer segun la condition
+          var endif = asm.symbol();
+          _conditional_jmp(endif);
+          compile(node.statement[0]);
+          tag(endif);
         }
 
       };
 
       var compile = function(node) {
         if (!_compile[node.type]) throw "Unimplemented node: " + node.type;
-        _compile[node.type](node);
+        return _compile[node.type](node);
       };
 
       compile(ast);

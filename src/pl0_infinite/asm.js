@@ -111,9 +111,19 @@ window.Asm = (function() {
     this._jmp(s, 0xeb, 0xe9);
   };
 
-  asm.prototype.je = function(s) {
-    this._jmp(s, 0x74, [0x0f, 0x84]);
+  var jmpcode = function(name, code){
+    asm.prototype[name] = function(s) {
+      this._jmp(s, 0x70+code, [0x0f, 0x80+code]);
+    };
   };
+
+  jmpcode("je", 0x04);
+  jmpcode("jne", 0x05);
+  jmpcode("jpe", 0x0a);
+  jmpcode("jl", 0x0c);
+  jmpcode("jge", 0x0d);
+  jmpcode("jle", 0x0e);
+  jmpcode("jg", 0x0f);
 
   asm.prototype.call = function(s) {
     this._jmp(s, null, 0xe8);
@@ -148,6 +158,16 @@ window.Asm = (function() {
 
   asm.prototype.add = function(r1, r2) {
     this.byte(0x01);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
+  asm.prototype.cmp = function(r1, r2) {
+    this.byte(0x39);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
+  asm.prototype.and = function(r1, r2) {
+    this.byte(0x21);
     this.byte(0xc0 + (r2.number << 3) + r1.number);
   };
 
