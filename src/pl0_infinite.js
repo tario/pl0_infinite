@@ -289,7 +289,9 @@ window.PL0Infinite = (function() {
       } else if (token.type === "READLN") {
         child("statement", "readln", function() {
           readToken("READLN");
-          currentNode.attr("ident", readToken("IDENT").value); 
+          readToken("(");
+            currentNode.attr("ident", readToken("IDENT").value); 
+          readToken(")");
         });
       } else if (token.type === "WRITELN" || token.type === "WRITE") {
         child("statement", token.type.toLowerCase(), function() {

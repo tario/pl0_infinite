@@ -145,7 +145,7 @@ describe("Parser", function() {
       type: "write",
       expression: [{type: "expression", term: [{type: "product", factor: [{type:"ident", value: ["a"]}] }] }]
     }},
-    {tokens: ["READLN", "IDENT/a"], tree: {
+    {tokens: ["READLN", "(", "IDENT/a", ")"], tree: {
       type: "readln",
       ident: ["a"]
     }}
