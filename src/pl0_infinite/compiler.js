@@ -35,6 +35,9 @@ window.PL0Compiler = (function() {
       var jle = asm.jle.bind(asm);
       var jg = asm.jg.bind(asm);
       var jpe = asm.jpe.bind(asm);
+      var cdq = asm.cdq.bind(asm);
+      var xchg = asm.xchg.bind(asm);
+      var idiv = asm.idiv.bind(asm);
 
       var cmp = asm.cmp.bind(asm);
       var eax = r.eax;
@@ -107,7 +110,15 @@ window.PL0Compiler = (function() {
               if (_save) push(ebx);
               compile(f);
               if (_save) pop(ebx);
-              imul(eax, ebx);
+
+              if (f.divide) {
+                xchg(eax, ebx);
+                cdq();
+                idiv(ebx);
+                xchg(eax, ebx);
+              } else {
+                imul(eax, ebx);
+              }
             });
             mov(eax, ebx);
           }
@@ -126,7 +137,12 @@ window.PL0Compiler = (function() {
               if (_save) push(ebx);
               compile(t);
               if (_save) pop(ebx);
-              add(ebx, eax);
+
+              if (t.negative) {
+                sub(ebx, eax);
+              } else {
+                add(ebx, eax);
+              }
             });
             mov(eax, ebx);
           }

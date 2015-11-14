@@ -161,6 +161,11 @@ window.Asm = (function() {
     this.byte(0xc0 + (r2.number << 3) + r1.number);
   };
 
+  asm.prototype.sub = function(r1, r2) {
+    this.byte(0x29);
+    this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
   asm.prototype.cmp = function(r1, r2) {
     this.byte(0x39);
     this.byte(0xc0 + (r2.number << 3) + r1.number);
@@ -169,6 +174,27 @@ window.Asm = (function() {
   asm.prototype.and = function(r1, r2) {
     this.byte(0x21);
     this.byte(0xc0 + (r2.number << 3) + r1.number);
+  };
+
+  asm.prototype.xchg = function(r1, r2) {
+    if (r2 === asm.regs.eax) {
+      return this.xchg(r2, r1);
+    }
+
+    if (r1 === asm.regs.eax) {
+      this.byte(0x90 + r2.number);
+    } else {
+      throw "Unsupported instruction xchg " + r1.name + "," + r2.name;
+    }
+  };
+
+  asm.prototype.idiv = function(r) {
+    this.byte(0xf7);
+    this.byte(0xf8 + r.number);
+  };
+
+  asm.prototype.cdq = function() {
+    this.byte(0x99);
   };
 
   asm.prototype.mov = function(destination, origin) {
