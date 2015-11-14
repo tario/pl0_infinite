@@ -696,7 +696,7 @@ window.PL0Infinite = (function() {
         return translate(tree.expression[0]) + compareOperators[tree.operator[0]] + translate(tree.expression[1]);
       },
       "odd": function(tree) {
-        return translate(tree.expression[0]) + " % 2 === 0"
+        return translate(tree.expression[0]) + " % 2 === 1"
       },
       "if": function(tree) {
         return "if("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";

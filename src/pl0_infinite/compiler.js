@@ -186,10 +186,26 @@ window.PL0Compiler = (function() {
 
         "if": function(node) {
           var _conditional_jmp = compile(node.condition[0]); // devuelve el jmp que deberias hacer segun la condition
+                                                             // si esta NO se cumple
           var endif = asm.symbol();
           _conditional_jmp(endif);
           compile(node.statement[0]);
           tag(endif);
+        },
+
+        "while": function(node) {
+          var repeat = asm.symbol();
+          var out = asm.symbol();
+          
+          tag(repeat);
+          
+          var _conditional_jmp = compile(node.condition[0]); // devuelve el jmp que deberias hacer segun la condition
+                                                             // si esta NO se cumple
+          _conditional_jmp(out);
+          compile(node.statement[0]);
+
+          jmp(repeat);
+          tag(out);
         }
 
       };
