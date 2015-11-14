@@ -47,6 +47,8 @@ window.PL0Compiler = (function() {
       writeenter.position = self.symbols.symbols.writeenter - self.symbols.base;
       exit.position = self.symbols.symbols.exit - self.symbols.base;
 
+      var globalsize = 0;
+
       var _needEbxSave = {
         number: function() {
           return false;
@@ -82,7 +84,8 @@ window.PL0Compiler = (function() {
         },
 
         offset: function(node) {
-          mov(eax, [edi, node.offset]);
+          if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
+          mov(eax, [edi, node.offset[0]]);
         },
 
         number: function(node) {
@@ -205,6 +208,8 @@ window.PL0Compiler = (function() {
 
         readln: function(node) {
           call(readln);
+
+          if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
           mov([edi, node.offset[0]],eax);
         },
 
@@ -234,6 +239,8 @@ window.PL0Compiler = (function() {
 
         lasgn: function(node) {
           compile(node.expression[0]);
+
+          if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
           mov([edi, node.offset[0]], eax);
         }
 
@@ -245,6 +252,10 @@ window.PL0Compiler = (function() {
       };
 
       compile(ast);
+
+      for(var i=0;i<globalsize;i++) {
+        asm.dword(0);
+      }
     });
 
     var sectionSize = this.symbols.baseSectionSize + result.length + 0x100 - (result.length & 0xFF) ;
