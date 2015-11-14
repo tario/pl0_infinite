@@ -101,10 +101,10 @@ describe("Scanner", function() {
   testScan("6VAR", ['NUMBER/6', 'VAR', 'EOF']);
 
   describe("strings", function() {
-    testScan('"alpha"', ['STRING/alpha', 'EOF']);
-    testScan('"beta"', ['STRING/beta', 'EOF']);
-    testScan('"gamma"', ['STRING/gamma', 'EOF']);
-    testScan('"x"6', ['STRING/x', 'NUMBER/6', 'EOF']);
+    testScan("'alpha'", ['STRING/alpha', 'EOF']);
+    testScan("'beta'", ['STRING/beta', 'EOF']);
+    testScan("'gamma'", ['STRING/gamma', 'EOF']);
+    testScan("'x'6", ['STRING/x', 'NUMBER/6', 'EOF']);
   });
 
   testScan("CONST\nVAR", [{line:1}, {line:2}, {type: "EOF"}]);

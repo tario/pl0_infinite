@@ -23,7 +23,7 @@ window.PL0Infinite = (function() {
       [/^>$/, "Z3"],
       [/^:$/, "Z6"],
       [/^[.,;<>+\-*\/\(\)]$/, "Z5"],
-      [/^\"$/ /*"*/, "ZSTR", {skip: true}],
+      [/^\'$/ /*'*/, "ZSTR", {skip: true}],
       [/^$/, "S", {emit: token("EOF")}]
     ],
     Z1: [
@@ -58,7 +58,7 @@ window.PL0Infinite = (function() {
       [/^.?$/, "S", {emit: tokenSelf}]
     ],
     ZSTR: [
-      [/^\"$/ /*"*/, "S", {emit: token("STRING"), forward:1}],
+      [/^\'$/ /*'*/, "S", {emit: token("STRING"), forward:1}],
       [/^.$/, "ZSTR"],
       [/^$/, "S", {emit: token("EOF")}]
     ]
