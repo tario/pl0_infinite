@@ -88,7 +88,7 @@ window.PL0Compiler = (function() {
 
         offset: function(node) {
           if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
-          mov(eax, [edi, node.offset[0]]);
+          mov(eax, [edi, node.offset[0]*4]);
         },
 
         number: function(node) {
@@ -220,7 +220,7 @@ window.PL0Compiler = (function() {
           call(readln);
 
           if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
-          mov([edi, node.offset[0]],eax);
+          mov([edi, node.offset[0]*4],eax);
         },
 
         "if": function(node) {
@@ -251,7 +251,7 @@ window.PL0Compiler = (function() {
           compile(node.expression[0]);
 
           if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
-          mov([edi, node.offset[0]], eax);
+          mov([edi, node.offset[0]*4], eax);
         }
 
       };
