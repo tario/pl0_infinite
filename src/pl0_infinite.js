@@ -65,7 +65,7 @@ window.PL0Infinite = (function() {
   }
 
   var separators = [".", "=", ",", ";", "=", "<", ">", "+", "-", "*", "/", "(", ")"];
-  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD", "WRITELN", "READLN", "WRITE"];
+  var keywords = ["PROCEDURE", "CONST", "VAR", "CALL", "IF", "THEN", "WHILE", "DO", "BEGIN", "END", "ODD", "WRITELN", "READLN", "WRITE", "INFINITE"];
   DefaultScanner.prototype.scan = function(text) {
 
     var currentIndex = 0;
@@ -279,6 +279,11 @@ window.PL0Infinite = (function() {
       } else if (token.type === "IF") {
         child("statement", "if", function() {
           readToken("IF"); readCondition(); readToken("THEN");
+            readStatement();
+        });
+      } else if (token.type === "INFINITE") {
+        child("statement", "infinite", function() {
+          readToken("INFINITE"); readToken("DO");
             readStatement();
         });
       } else if (token.type === "WHILE") {
@@ -740,6 +745,9 @@ window.PL0Infinite = (function() {
       "while": function(tree) {
         return "while("+ translate(tree.condition[0]) + ") {" + translate(tree.statement[0]) + "}";
       },
+      "infinite": function(tree) {
+        return "while(1) {" + translate(tree.statement[0]) + "}";
+      },
       "call": function(tree) {
         return "_p"+tree.number[0]+"()";
       }
@@ -749,8 +757,6 @@ window.PL0Infinite = (function() {
       var f = translateFcn[tree.type];
       if (f) {
         return f(tree);
-      } else {
-        debugger;
       }
     };
 

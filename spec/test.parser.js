@@ -453,6 +453,17 @@ describe("Parser", function() {
   ];
 
   validStatements.forEach(function(statement) {
+    testParse(["INFINITE", "DO", statement.tokens, ".", "EOF"], {
+      type: "program",
+      block: [{
+        type: "block",
+        statement: [{
+          type: "infinite",
+          statement: [statement.tree]
+        }]
+      }]
+    });
+
     conditions.forEach(function(condition) {
       testParse(["IF", condition.tokens, "THEN", statement.tokens, ".", "EOF"], condition.tree ? {
         type: "program",
@@ -480,6 +491,8 @@ describe("Parser", function() {
 
     testParse(["IF", ["IDENT/M", "*", ">", "NUMBER/5"], "THEN", statement.tokens, ".", "EOF"], false);
   });
+
+
 
 });
 

@@ -258,6 +258,13 @@ window.PL0Compiler = (function() {
           tag(endif);
         },
 
+        "infinite": function(node) {
+          var repeat = asm.symbol();
+          tag(repeat);
+          compile(node.statement[0]);
+          jmp(repeat);
+        },
+
         "while": function(node) {
           var repeat = asm.symbol();
           var out = asm.symbol();
