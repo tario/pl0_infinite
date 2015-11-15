@@ -100,6 +100,7 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
         } else {
           $timeout(function() { $scope.error = e.toString() });
         }
+        $timeout(function() { $scope.runner = null});
       }
     };
 
