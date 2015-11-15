@@ -28,6 +28,7 @@ window.PL0Compiler = (function() {
       var tag = asm.tag.bind(asm);
       var and = asm.and.bind(asm);
       var call = asm.call.bind(asm);
+      var neg = asm.neg.bind(asm);
 
       var je = asm.je.bind(asm);
       var jne = asm.jne.bind(asm);
@@ -130,9 +131,17 @@ window.PL0Compiler = (function() {
           if (node.term.length === 0) {
           } else if (node.term.length === 1) {
             compile(node.term[0]);
+            if (node.term[0].negative) {
+              neg(eax);
+            }
           } else {
             compile(node.term[0]);
-            mov(ebx, eax);
+            if (node.term[0].negative) {
+              xor(ebx, ebx);
+              sub(ebx, eax);
+            } else {
+              mov(ebx, eax);
+            }
             node.term.slice(1).forEach(function(t) {
               var _save = needEbxSave(t);
               if (_save) push(ebx);

@@ -197,6 +197,11 @@ window.Asm = (function() {
     this.byte(0x99);
   };
 
+  asm.prototype.neg = function(r) {
+    this.byte(0xf7);
+    this.byte(0xd8 + r.number);
+  };
+
   asm.prototype.mov = function(destination, origin) {
     if (destination.type === "reg") {
       if (origin.type === "reg") {
