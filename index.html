@@ -61,6 +61,14 @@
 <div ng-app="PL0InfiniteUI">
     <div ng-controller="MainController">
         <h3>PL/0  &#9733;&#9733;&#9733;  INFINITE &#9733;&#9733;&#9733;</h3>
+        
+        <b>Source: </b>
+        <select
+          ng-options="file.name for file in files"
+          ng-model="selectedFile"
+          ng-change="selectedFileChanged()">
+        </select>
+
         <table class="maintable">
           <tr>
             <td class="codeeditor">
