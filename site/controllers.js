@@ -49,6 +49,44 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
     });
   }();
 
+  var hexnum = function(x, relleno) {
+    var ret = x.toString(16);
+    while (ret.length < relleno) ret = "0" + ret;
+    return ret;
+  };
+
+  var printableChar = function(c) {
+    return c < 127 && c > 31 ? String.fromCharCode(c) : ".";
+  };
+
+  var toHexdump = function(b) {
+    var ret = "Offset\x09\x09";
+    for (var i = 0; i < 16; i++) {
+      ret = ret + hexnum(i,0) + "  ";
+      if (i%16 == 7) ret = ret + "  ";
+    }
+
+    ret = ret + "\n";
+
+    for (var i = 0; i < b.length; i+=16) {
+      ret = ret + hexnum(i, 8) + "\x09";
+      for (var j = i; j < i + 16; j++) {
+        ret = ret + hexnum(b[j], 2) + " ";
+        if (j%16 == 7) ret = ret + "  ";
+      }
+
+      ret = ret + "   "
+
+      for (var j = i; j < i + 16; j++) {
+        ret = ret + printableChar(b[j]);
+      }
+
+      ret = ret + "\n";
+    }
+
+    return ret;
+  }; 
+
   $scope.download_win32 = function() {
     var parser = new PL0Infinite.DefaultParser({});
     var scanner = new PL0Infinite.DefaultScanner({});
@@ -59,7 +97,11 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
     parser.parse(scan, {output: semantic});
 
     var a = document.createElement("a");
-    var blob = win32_compiler.buildExe(builder.result);
+    var buffer = win32_compiler.buildExe(builder.result);
+    var blob = new Blob([buffer], {type: "application/octet-stream"});
+
+    $scope.hexdump = toHexdump(buffer);
+
     var url = window.URL.createObjectURL(blob);
     document.body.appendChild(a);
     a.style = "display: none";    

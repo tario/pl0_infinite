@@ -328,7 +328,13 @@ window.PL0Compiler = (function() {
     dword(this.header, 0x000001a8, sectionSize);
 
     var payload = new Uint8Array(0x200 + sectionSize - this.header.length - result.length);
-    return new Blob([this.header, result, payload], {type: "application/octet-stream"});
+
+    var retvalue = new Uint8Array(this.header.length + result.length + payload.length);
+    retvalue.set(this.header, 0);
+    retvalue.set(result, this.header.length);
+    retvalue.set(payload, this.header.length + result.length); 
+
+    return retvalue;
   };
 
 

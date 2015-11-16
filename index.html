@@ -54,6 +54,12 @@
   height: 100px;
 }
 
+textarea.hexdump {
+  width: 100%;
+  height: 100px;
+  font-family: monospace;
+}
+
 </style>
 </head>
 <body>
@@ -91,6 +97,9 @@
         <h3>Output</h3>
         <a ng-show="runner" ng-click="download_win32()">Download EXE (Win32)</a>
         <p class="code" ng-if="runner && runner.code">{{log}}</p>
+
+        <h3>Hexdump</h3>
+        <textarea class="hexdump" ng-model="hexdump"></textarea>
     </div>
 </div>
 
