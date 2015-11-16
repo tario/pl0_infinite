@@ -91,34 +91,26 @@ window.PL0Compiler = (function() {
           });
         },
 
-        offset: function(node, destreg) {
-          destreg = destreg || eax;
+        offset: function(node) {
           if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
-          mov(destreg, [edi, node.offset[0]*4]);
+          mov(eax, [edi, node.offset[0]*4]);
         },
 
-        number: function(node, destreg) {
-          destreg = destreg || eax;
-          if (node.value[0] < 1) {
-            xor(destreg, destreg);
-            for (var i=1; i<node.value[0]; i++) inc(destreg);
-          } else {
-            mov(destreg, node.value[0]);
-          }
+        number: function(node) {
+          mov(eax, node.value);
         },
 
-        product: function(node, destreg) {
+        product: function(node) {
           if (node.factor.length === 0) {
           } else if (node.factor.length === 1) {
-            destreg = destreg || eax;
-            compile(node.factor[0], destreg);
+            compile(node.factor[0]);
           } else {
-            destreg = destreg || ebx;
-            compile(node.factor[0], ebx);
+            compile(node.factor[0]);
+            mov(ebx, eax);
             node.factor.slice(1).forEach(function(f) {
               var _save = needEbxSave(f);
               if (_save) push(ebx);
-              compile(f, eax);
+              compile(f);
               if (_save) pop(ebx);
 
               if (f.divide) {
@@ -130,30 +122,30 @@ window.PL0Compiler = (function() {
                 imul(eax, ebx);
               }
             });
-            if (destreg !== ebx) mov(destreg, ebx);
+            mov(eax, ebx);
           }
 
-          return destreg;
         },
 
-        expression: function(node, destreg) {
+        expression: function(node) {
           if (node.term.length === 0) {
           } else if (node.term.length === 1) {
-            destreg = compile(node.term[0], destreg);
+            compile(node.term[0]);
             if (node.term[0].negative) {
               neg(eax);
             }
-            return destreg;
           } else {
-            destreg = destreg || ebx;
-            compile(node.term[0], ebx);
+            compile(node.term[0]);
             if (node.term[0].negative) {
-              neg(ebx);
+              xor(ebx, ebx);
+              sub(ebx, eax);
+            } else {
+              mov(ebx, eax);
             }
             node.term.slice(1).forEach(function(t) {
               var _save = needEbxSave(t);
               if (_save) push(ebx);
-              compile(t, eax);
+              compile(t);
               if (_save) pop(ebx);
 
               if (t.negative) {
@@ -162,10 +154,8 @@ window.PL0Compiler = (function() {
                 add(ebx, eax);
               }
             });
-            if (destreg !== ebx) mov(destreg, ebx);
+            mov(eax, ebx);
           }
-
-          return destreg;
         },
 
         writeln: function() {
@@ -179,7 +169,7 @@ window.PL0Compiler = (function() {
             mov(eax, newstrconst.symbol);
             asm.call(writestring);
           } else {
-            compile(node.expression[0], eax);
+            compile(node.expression[0]);
             asm.call(write);
           }
         },
@@ -209,11 +199,11 @@ window.PL0Compiler = (function() {
         block: function(node, codeStartSymbol) {
           if (node.procedure && node.procedure.length > 0) {
             var avoidProcedure = asm.symbol();
-            if (!codeStartSymbol) jmp(avoidProcedure);
+            jmp(avoidProcedure);
               node.procedure.forEach(function(p){
                 compile(p);
               });
-            if (!codeStartSymbol) tag(avoidProcedure);
+            tag(avoidProcedure);
           }
 
           if (node.statement) {
@@ -291,10 +281,10 @@ window.PL0Compiler = (function() {
         },
 
         lasgn: function(node) {
-          var destreg = compile(node.expression[0]);
+          compile(node.expression[0]);
 
           if (node.offset[0]+1 > globalsize) globalsize = node.offset[0]+1
-          mov([edi, node.offset[0]*4], destreg);
+          mov([edi, node.offset[0]*4], eax);
         }
 
       };
