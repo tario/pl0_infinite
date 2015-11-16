@@ -8,6 +8,7 @@
 <script src="lib/codemirror.js"></script>
 <script src="lib/codemirror/mode/pascal.js"></script>
 <script src="lib/angular/ui-codemirror.js"></script>
+<script src="lib/disasm.js"></script>
 <script src="src/pl0_infinite.js?version=6d362ea"></script>
 <script src="src/pl0_infinite/asm.js?version=6d362ea"></script>
 <script src="src/pl0_infinite/compiler.js?version=6d362ea"></script>
@@ -20,12 +21,37 @@
   white-space: pre;
 }
 
+
+.disasmview p {
+  white-space: pre-wrap;
+  font-size: 12px;
+  font-family: monospace;
+}
+
 .code {
   white-space: pre-wrap;
 }
 
 .errorline {
   background-color: #fcc;
+}
+
+.maintable {
+  width: 100%;
+}
+
+.codeeditor {
+  width: 50%;
+}
+
+.disasmview {
+  width: 50%;
+  vertical-align: top;
+  overflow: scroll;
+}
+
+.disasmview div {
+  height: 100px;
 }
 
 </style>
@@ -35,8 +61,20 @@
 <div ng-app="PL0InfiniteUI">
     <div ng-controller="MainController">
         <h3>PL/0  &#9733;&#9733;&#9733;  INFINITE &#9733;&#9733;&#9733;</h3>
-        <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal', onLoad: codemirrorLoaded}" ng-model="code">
-        </textarea>
+        <table class="maintable">
+          <tr>
+            <td class="codeeditor">
+              <textarea ui-codemirror="{lineNumbers: true, lineWrapping: true, mode: 'pascal', onLoad: codemirrorLoaded}" ng-model="code">
+              </textarea>
+            </td>
+            <td class="disasmview">
+              <div>
+                <p>{{disasmcode}}</p>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <br/>
         <h3>Results</h3>
         <p>
         <b ng-if="error"class="code-error">{{error}}</b>

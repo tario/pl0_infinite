@@ -47,7 +47,7 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
     parser.parse(scan, {output: semantic});
 
     var a = document.createElement("a");
-    var blob = win32_compiler.compile(builder.result);
+    var blob = win32_compiler.buildExe(builder.result);
     var url = window.URL.createObjectURL(blob);
     document.body.appendChild(a);
     a.style = "display: none";    
@@ -81,7 +81,10 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
         parser.parse(scan, {output: semantic});
         $timeout(function() {
           clearErrorLines();
+
+          SetBasePosition("0000000000401500");
           $scope.runner = PL0Infinite.transpile(builder.result);
+          $scope.disasmcode = Disassemble(win32_compiler.compile(builder.result));
           $scope.error = null;
         });
       } catch (e) {
@@ -100,7 +103,10 @@ app.controller("MainController", ["$scope", "$timeout", "fn", "PL0Infinite", "$q
         } else {
           $timeout(function() { $scope.error = e.toString() });
         }
-        $timeout(function() { $scope.runner = null});
+        $timeout(function() { 
+          $scope.runner = null;
+          $scope.disasmcode = "";
+        });
       }
     };
 

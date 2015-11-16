@@ -309,6 +309,11 @@ window.PL0Compiler = (function() {
       });
     });
 
+    return result;
+  };
+
+  compiler.prototype.buildExe = function(ast) {
+    var result = this.compile(ast);
     var sectionSize = this.symbols.baseSectionSize + result.length + 0x100 - (result.length & 0xFF) ;
 
     var dword = function(array, address, value) {
@@ -325,6 +330,8 @@ window.PL0Compiler = (function() {
     var payload = new Uint8Array(0x200 + sectionSize - this.header.length - result.length);
     return new Blob([this.header, result, payload], {type: "application/octet-stream"});
   };
+
+
 
   return compiler;
 })();
