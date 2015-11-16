@@ -179,7 +179,7 @@ window.PL0Compiler = (function() {
             mov(eax, newstrconst.symbol);
             asm.call(writestring);
           } else {
-            compile(node.expression[0]);
+            compile(node.expression[0], eax);
             asm.call(write);
           }
         },
