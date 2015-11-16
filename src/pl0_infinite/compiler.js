@@ -209,11 +209,11 @@ window.PL0Compiler = (function() {
         block: function(node, codeStartSymbol) {
           if (node.procedure && node.procedure.length > 0) {
             var avoidProcedure = asm.symbol();
-            jmp(avoidProcedure);
+            if (!codeStartSymbol) jmp(avoidProcedure);
               node.procedure.forEach(function(p){
                 compile(p);
               });
-            tag(avoidProcedure);
+            if (!codeStartSymbol) tag(avoidProcedure);
           }
 
           if (node.statement) {
